@@ -582,7 +582,7 @@ const getAdvancedInference = async () => {
     // console.log(params);
     axios.defaults.baseURL =
         process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-    const result = await axios.post(base + '/api/v1/advanced_inference/interactiveInference', params, {
+    const result = await axios.post(base + '/api/v1/try_it_out/interactiveInference', params, {
         headers: {
             'Content-Type': 'application/json',
         },

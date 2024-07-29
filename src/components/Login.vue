@@ -80,12 +80,22 @@ const handleLogin = async () => {
             },
         });
         console.log(result);
-        if (result.status == 200) {
-            userStore.setIsLogin(true);
+        if (result.status == 200) {            
             loginData.value.token = result.data.access_token;
             loginData.value.password = '';
             const {password,...cookieData} = loginData.value;
+            const userInfoResponse = await axios.get(base+'/api/v1/user/', {
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    Authorization: 'Bearer ' + loginData.value.token
+                                                },
+                                            });
+            if (userInfoResponse.status == 200) {
+                cookieData.fullname = userInfoResponse.data.fullname;
+            }
             userStore.setUserInfo(cookieData);
+            userStore.setIsLogin(true);
+
             window.location.reload();
         } else {
             errorMsg.value = result.data.detail[0].msg;
