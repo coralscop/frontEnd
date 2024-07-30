@@ -11,9 +11,15 @@
                 <span style="color: black;">{{ userStore.userInfo.fullname }}</span>
             </div>
         </div>
+        <div class="user-tools">
+                <div class="button success">
+                    <span @click="createCollectionVisible = true">Create collection</span>
+                </div>
+        </div>
         <div class="collection-menu">
             <el-menu :default-active="activeIndex" mode="horizontal">
                 <el-menu-item index="1">All Images</el-menu-item>
+                <el-menu-item index="2">Collection</el-menu-item>
             </el-menu>
         </div>
         <div class="collection-content">
@@ -80,6 +86,58 @@
 
             </el-row>
         </div>
+
+        <div class="collection-list">
+            <div class="collection-statistic">
+                <svg t="1719857738915" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="11490" width="24" height="24">
+                    <path
+                        d="M512 949.138286c238.72 0 437.138286-197.997714 437.138286-437.138286 0-238.72-198.857143-437.138286-437.577143-437.138286C272.438857 74.861714 74.88 273.28 74.88 512c0 239.140571 197.997714 437.138286 437.138286 437.138286z m-116.150857-217.289143c-18.432 0-32.146286-15.853714-28.288-33.846857l18.011428-89.142857h-40.283428c-14.994286 0-25.709714-11.154286-25.709714-26.148572 0-17.554286 12.854857-30.427429 29.988571-30.427428h48l19.291429-91.282286H377.417143c-14.994286 0-26.148571-11.154286-26.148572-26.569143 0-17.152 13.293714-30.427429 30.006858-30.427429h47.579428l19.712-92.16c2.998857-17.133714 14.153143-25.709714 32.146286-25.709714 18.852571 0 31.707429 15.872 27.849143 33.865143l-17.133715 84.004571h83.565715l19.291428-92.16c3.419429-17.133714 14.994286-25.709714 32.566857-25.709714 18.432 0 31.725714 15.433143 28.288 33.865143l-17.152 84.004571h39.862858c14.573714 0 25.289143 11.154286 25.289142 26.569143 0 17.554286-12.434286 30.427429-29.988571 30.427429h-47.158857l-19.712 91.282286h39.424c14.994286 0 25.728 11.154286 25.728 26.148571 0 17.554286-12.854857 30.427429-30.006857 30.427429h-46.72l-20.571429 96.859428c-3.419429 17.133714-14.994286 26.148571-33.426286 26.148572-17.993143 0-30.848-15.872-27.428571-33.865143l18.432-88.722286h-83.565714l-20.571429 96.438857c-2.998857 17.133714-14.153143 26.148571-31.725714 26.148572z m60.434286-174.427429h90.422857l21.010285-100.699428H477.257143z"
+                        p-id="11491" fill="#129fe1"></path>
+                </svg>
+                <p>{{ totalCollectionNum.toLocaleString() }}</p>
+                <p>collections</p>
+
+            </div>
+            <!-- <div class="collection-tool">
+                <span @click="selectVisible = true" v-if="!selectVisible">
+                    <el-icon><CircleCheck /></el-icon>
+                    <p>Select</p>
+                </span>
+                <p v-show="selectVisible"><el-checkbox v-model="selectAll" label="" size="large" @change="handleSelectAll(selectAll)" />Select All</p>
+
+                <div v-show="selectVisible">
+                    <el-button class="batch-process-btn collection-btn" @click="handleBatchProcess">Run</el-button>
+                    <el-button class="normal-btn collection-btn" @click="handleConfig">Config</el-button>
+                    <el-button class="normal-btn collection-btn" @click="handleDownload">Download</el-button>
+                    <el-button class="normal-btn collection-btn" @click="handleCancelSelect">Cancel</el-button>
+                </div>
+
+            </div> -->
+
+            <el-row :gutter="0" class="collection-row">
+                <el-col class="collection-col" :xs="10" :sm="7" :md="6" :lg="5" v-for="(item, index) in collectionList"
+                    :key="index">
+
+                    <el-checkbox v-model="item.bpCheck" label="" size="large" v-show="selectVisible"
+                        class="batch-process-checkbox" />
+                    <el-card shadow="hover" :body-style="{ padding: '10px', boxSizing: 'border-box', width: '100%' }">
+                        <svg v-show="item.isDone" style="position: absolute; top:0; right: 0; z-index: 15;" width="50" height="50" xmlns="http://www.w3.org/2000/svg" t="1721791036512" class="icon" version="1.1" p-id="47307"><g><title>Layer 1</title><g><g><title>Layer 1</title><g stroke="null"><g stroke="null"><title stroke="null">Layer 1</title><g stroke="null"><path p-id="47308" fill="#409eff" d="m-0.10472,-0.12324l23.02389,0l27.18556,27.22487l0,23.02162l-50.20945,-50.24649l0,-0.00001l0,0.00001z" stroke="null"/></g><text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_8" y="44.82062" x="28.67433" stroke-width="0" fill="#ffffff" transform="matrix(0.352269 0.355564 -0.354549 0.353278 22.1903 -16.543)" stroke="null">DONE</text></g></g></g></g></g></svg>
+                        <!-- <el-image :src="'https://coralscop-bke.hkustvgd.com/usr_imgs/' + item.image_name"
+                            lazy></el-image> -->
+                        <div class="collection-item-info">
+                            <p class="collection-item-site" style="color: black;">Site: {{ item.name }} {{ item.loc }} - {{formatNumber(item.geo.coordinates[0], 2) }},{{ formatNumber(item.geo.coordinates[1], 2)}}</p>
+                            <ul class="collection-item-tool">
+                                <!-- <li class="collection-item-btn" @click="handleImageInfo(item)"><span v-if="item.isDone">Rerun</span><span v-else>Run</span></li>
+                                <li class="collection-item-btn"  @click="handleResultInfo(item)">Result</li> -->
+                            </ul>
+                        </div>
+                    </el-card>
+                </el-col>
+
+            </el-row>
+        </div>
+
         <el-dialog append-to-body width="650px" top="5vh" title="Upload Image" v-model="uploadFormVisible"
             destroy-on-close draggable :close-on-click-modal=false :close-on-press-escape=false
             @close="handleUploadClose" :show-close="false">
@@ -177,6 +235,40 @@
                 <!-- <AutoModel :usrMode="'collection'" :imageUrl="currentImageInfoUrl" :imageName="currentImageName"></AutoModel> -->
             </div>
         </el-dialog>
+
+        <el-dialog append-to-body width="650px" top="5vh" title="Create image collection" v-model="createCollectionVisible"
+            destroy-on-close draggable :close-on-click-modal=false :close-on-press-escape=false
+            @close="handleCreateCollectionClose" :show-close="false">
+            <template #header="{ close }">
+                <div class="form-title">
+                    <p>Create Image Collection</p>
+                    <el-icon @click="close">
+                        <Close />
+                    </el-icon>
+                </div>
+            </template>
+            <el-form v-if="createCollectionStatus == 'ready'" ref="newCollectionFormRef" :model="newCollectionData"
+                :rules="newCollectionRules" :label-position="'left'" style="max-width: 600px; margin: 20px;"
+                label-width="auto" status-icon>
+                <el-form-item label="Latitude" prop="latitude">
+                    <el-input v-model="newImageData.latitude" @blur="handleUpdateSite" />
+                </el-form-item>
+                <el-form-item label="Longitude" prop="longitude">
+                    <el-input v-model="newImageData.longitude" @blur="handleUpdateSite" />
+                </el-form-item>
+                <el-form-item label="Site name" prop="site">
+                    <!-- <span>{{ newImageData.site }}</span> -->
+                    <el-input v-model="newImageData.site" />
+                </el-form-item>                
+                <div class="middle-form-item">
+                    <el-button type="primary" @click="submitcreateCollectionForm">Create</el-button>
+                </div>
+                <p style="color: red;" class="tips">{{ errorMsg }}</p>
+            </el-form>
+            <el-result v-if="createCollectionStatus == 'success'" icon="success" title="Successfully Created"
+                sub-title="Please check in collection page"></el-result>
+        </el-dialog>
+
     </div>
     <el-backtop :right="30" :bottom="50" />
 </template>
@@ -250,6 +342,31 @@ const newImageRules = ref({
     ],
 })
 
+
+//Collection
+const createCollectionVisible = ref(false)
+const newCollectionFormRef = ref();
+const createCollectionStatus = ref('ready');
+const newCollectionData = ref({
+    latitude: 22.23,
+    longitude: 114.32,
+    site: 'Hong Kong',
+})
+
+const newCollectionRules = ref({
+    longitude: [
+        { required: true, message: 'Please enter the longitude', trigger: 'change' },
+        { pattern: /^-?((1?[0-7]?[0-9](\.\d+)?)|180(\.0+)?)$/, message: 'Please enter a valid longitude', trigger: 'change' },
+    ],
+    latitude: [
+        { required: true, message: 'Please enter the latitude', trigger: 'change' },
+        { pattern: /^-?((([0-8]?[0-9](\.\d+)?)|90(\.0+)?))$/, message: 'Please enter a valid latitude', trigger: 'change' },
+    ],
+})
+
+const collectionList = ref();
+const totalCollectionNum = ref(0)
+
 const getAllUsrImages = async () => {
     try {
         // https://coralscop-bke.hkustvgd.com/api/v1/user/images
@@ -285,6 +402,35 @@ const getAllUsrImages = async () => {
     } catch (error) {
         console.error(error);
     }
+}
+
+const getAllOfUserCollections = async () => {
+    try {
+        axios.defaults.baseURL =
+            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
+
+        var res = await axios.get(bkebase + '/api/v1/collection/', {
+            headers: {
+                Authorization: 'Bearer ' + userStore.userInfo.token
+            }
+        });
+        // console.log(res);
+        if (res.status == 200) {
+            collectionList.value = res.data;
+            // console.log(imageList.value);
+            collectionList.value = await Promise.all(collectionList.value.map(async (item) => {
+                var newItem = item;
+                var sitename = await getSiteName(item['geo']['coordinates'][1],item['geo']['coordinates'][0])
+                newItem['loc'] = sitename;
+                newItem['bpCheck'] = false;
+                return newItem;
+            }));
+            totalCollectionNum.value = collectionList.value.length;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
 }
 
 const getFileProgress = (file) => {
@@ -390,6 +536,47 @@ const submitForm = async () => {
         }
     });
 };
+
+const submitcreateCollectionForm = async () => {
+    const formInstance = newCollectionFormRef.value as any;
+    formInstance.validate(async (valid: boolean) => {
+        if (valid) {
+            let lat: string = newCollectionData.value.latitude;
+            let long: string = newCollectionData.value.longitude;
+            let site_name: string = newCollectionData.value.site.toString();
+            let reqData: dict = {
+                "geo": [long, lat],
+                "name": site_name
+            }            
+            await (async (formData: dict) => {
+                try {
+                    axios.defaults.baseURL =
+                        process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
+                    const result = await axios.post(bkebase + '/api/v1/collection/', formData, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: 'Bearer ' + userStore.userInfo.token
+                        },
+                    });
+                    // console.log(result);
+                    if (result.status == 200) {
+                        createCollectionStatus.value = 'success';
+                    }
+                } catch (err: any) {
+                    console.error(err);
+                    if (err.response.data) {
+                        errorMsg.value = err.response.data.detail[0].msg;
+                    } else {
+                        errorMsg.value = err;
+                    }
+                }
+            })(reqData)            
+        } else {
+            // Form validation failed, display error messages
+        }
+    });
+};
+
 const handleRemove = (file) => {
     dialogImageUrl.value = '';
     uploadPreviewDialogVisible.value = false;
@@ -415,6 +602,10 @@ const handleUploadClose = () => {
     uploadProgressList.value = [];
     getAllUsrImages();
     disabled.value = false;
+}
+
+const handleCreateCollectionClose = () => {
+    createCollectionStatus.value = 'ready';
 }
 
 const formatNumber = (numberString, precision) => {
@@ -555,6 +746,7 @@ const handleBatchProcess = () => {
 
 onMounted(() => {
     getAllUsrImages();
+    getAllOfUserCollections();
 })
 
 
@@ -822,4 +1014,35 @@ onMounted(() => {
     /* flex-direction: column; */
     justify-content: center;
 }
+
+
+.user-tools {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    color: black;
+    padding-left: 72px;
+}
+
+.user-tools .button {
+    border: 2px solid black;
+    background-color: white;
+    color: black;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+
+}
+
+/* Green */
+.user-tools .button.success {
+  border-color: #04AA6D;
+  color: green;
+}
+
+.user-tools .button.success:hover {
+  background-color: #04AA6D;
+  color: white;
+}
+
 </style>
