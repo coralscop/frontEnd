@@ -26,7 +26,7 @@
                 No account?
                 <span class="link-span" @click="handleTurnSignup">Sign up</span>
             </p>
-
+            <p style="color: green;" class="tips">{{ successMsg }}</p>
             <p style="color: red;" class="tips">{{ errorMsg }}</p>
         </el-form>
     </el-dialog>
@@ -65,6 +65,7 @@ const userStore = userInfoStore();
 
 const emit = defineEmits(['openSignup']);
 const errorMsg = ref('');
+const successMsg = ref('');
 
 const handleLogin = async () => {
     try {
@@ -80,7 +81,8 @@ const handleLogin = async () => {
             },
         });
         console.log(result);
-        if (result.status == 200) {            
+        if (result.status == 200) {    
+            successMsg.value = "Successfully login"        
             loginData.value.token = result.data.access_token;
             loginData.value.password = '';
             const {password,...cookieData} = loginData.value;
