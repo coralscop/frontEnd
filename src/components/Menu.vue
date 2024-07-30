@@ -49,6 +49,7 @@ const showMenu = ref(false);
 const menuInput = ref();
 const logInVisible = ref();
 const signUpVisible = ref();
+const router = useRouter();
 
 const userLogin = ref(false);
 const userStore = userInfoStore();
@@ -96,12 +97,17 @@ const handleTurnLogin = () => {
 
 const handleLogout = () => {
     userStore.clearUserInfo();
-    const router = useRouter();
-    router.push('/');
-    // window.location.reload();
+    userLogin.value = false;
+    //router.push('/');
+    window.location.href = "/"
 }
 const checkTokenExp = (token:string) => {
-    const decoded = jwtDecode(token);
+    interface BKEToken {
+        user_id: string;
+        email: string;
+        expires: number;
+        }
+    const decoded = jwtDecode<BKEToken>(token);
     // console.log(decoded);
     if (decoded.expires) {
         const tokenExp = decoded.expires;

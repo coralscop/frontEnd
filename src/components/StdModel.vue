@@ -206,6 +206,7 @@ const uploadImgRef = ref<UploadInstance>();
 // upload file-csv
 // const csvInput = ref<HTMLInputElement>();
 var csvFileName: string = '';
+var csvFilePath: string = '';
 const isUploadCsv = ref(true);
 const csvProgress = ref(0.0);
 const csvFileList: any = ref([]);
@@ -287,7 +288,7 @@ const uploadInteractiveImg = async (file: File) => {
         bkeImgName = '';
         let formData = new FormData();
         formData.append('image_file', file);
-        const result = await axios.post(bkebase + '/api/v1/advanced_inference/uploadImage', formData, {
+        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -311,8 +312,8 @@ const uploadCsv = async (file: File) => {
         csvFileName = '';
         let formData = new FormData();
         formData.append('csv_file', file);
-        formData.append('image_name', bkeImgName);
-        const result = await axios.post(bkebase + '/api/v1/advanced_inference/uploadCSV', formData, {
+        // formData.append('image_name', bkeImgName);
+        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadCSV', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -323,6 +324,7 @@ const uploadCsv = async (file: File) => {
         });
         // console.log(result);
         csvFileName = result.data.csv_file_name;
+        csvFilePath = result.data.csv_file_path;
     } catch (err) {
         console.error(err);
     }
@@ -393,11 +395,11 @@ const runModel = async () => {
         startRunTime();
         try {
             let params = {
-                'csv_file_name': csvFileName,
+                'csv_file_path': csvFilePath,
                 'image_name': bkeImgName
             };
             // https://coralscop-bke.hkustvgd.com/api/v1/advanced_inference/sparseToDenseInference
-            const result = await axios.post(bkebase + '/api/v1/advanced_inference/sparseToDenseInference', params, {
+            const result = await axios.post(bkebase + '/api/v1/try_it_out/sparseToDenseInference', params, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },

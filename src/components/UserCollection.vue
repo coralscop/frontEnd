@@ -8,7 +8,7 @@
                     <el-avatar style="position: relative; top: -30px; margin-left: 120px;" :icon="UserFilled"
                         :size="80" />
                 </div>
-                <span>{{ userStore.userInfo.fullname }}</span>
+                <span style="color: black;">{{ userStore.userInfo.fullname }}</span>
             </div>
         </div>
         <div class="collection-menu">

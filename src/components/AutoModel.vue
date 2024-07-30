@@ -183,9 +183,9 @@ import { userInfoStore } from '@/store/user'
 const userStore = userInfoStore();
 // axios api setting
 axios.defaults.baseURL =
-    process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
+    process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 // axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-const base = process.env.NODE_ENV === "development" ? "/api" : "";
+// const base = process.env.NODE_ENV === "development" ? "/api" : "";
 const bkebase = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const props = defineProps({
@@ -339,12 +339,12 @@ const changeParams = (value: string, index: number) => {
 }
 const uploadToSvr = async (formData: FormData) => {
     axios.defaults.baseURL =
-        process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
+        process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
     try {
         console.log("===upload===");
         // console.log(process.env.NODE_ENV);
         // console.log(base);
-        const result = await axios.post(base + '/upload', formData, {
+        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -354,6 +354,7 @@ const uploadToSvr = async (formData: FormData) => {
             },
         });
         uploadImgName.value = result.data.image_name;
+        bkeImgName = result.data.image_name;
     } catch (err) {
         console.error(err);
     }
@@ -367,7 +368,7 @@ const uploadInteractiveImg = async (formData: FormData) => {
         axios.defaults.baseURL =
             process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
 
-        const result = await axios.post(bkebase + '/api/v1/advanced_inference/uploadImage', formData, {
+        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -392,7 +393,7 @@ const handleUploadImg = async (item) => {
     // console.log(formData.get('image_file'));
     upload.value = false;
     await uploadToSvr(formData);
-    await uploadInteractiveImg(formData);
+    // await uploadInteractiveImg(formData);
     handlePictureCardPreview(item.file);
 }
 
@@ -450,9 +451,9 @@ const runModel = async () => {
             startRunTime();
             if (usrMode.value === 'try') {
                 axios.defaults.baseURL =
-                process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
+                process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 
-                result = await axios.post(base + '/enqueue', params, {
+                result = await axios.post(bkebase + '/api/v1/try_it_out/enqueue', params, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -614,23 +615,23 @@ const generateMask = (annoList:any[], height:number, width:number) => {
 //     });
 // }
 
-const getResultInfo = async (imgName: string, maskPath: string, jsonFilePath: string) => {
+const getResultInfo = async (imgPath: string, maskPath: string, jsonFilePath: string) => {
     try {
         console.log("===result===");
         var json;
         if (usrMode.value == 'try') {
             axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
+            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 
-            resultImg.value = await axios.get(base + '/usr_imgs/' + imgName, {
+            resultImg.value = await axios.get(bkebase + imgPath, {
                 responseType: 'arraybuffer'
             });
 
-            resultMask.value = await axios.get(base + maskPath, {
+            resultMask.value = await axios.get(bkebase + maskPath, {
                 responseType: 'arraybuffer'
             });
 
-            json = await axios.get(base + jsonFilePath);
+            json = await axios.get(bkebase + jsonFilePath);
 
         } else if (usrMode.value === 'collection') {
             axios.defaults.baseURL =
@@ -650,7 +651,7 @@ const getResultInfo = async (imgName: string, maskPath: string, jsonFilePath: st
                     }
                 });
 
-                resultImg.value = await axios.get(bkebase + '/usr_imgs/' + imgName, {
+                resultImg.value = await axios.get(bkebase + imgPath, {
                     responseType: 'arraybuffer',
                     // withCredentials: true,
                     headers: {
@@ -661,8 +662,9 @@ const getResultInfo = async (imgName: string, maskPath: string, jsonFilePath: st
         
         let imageType = resultImg.value.headers['content-type'];
         const originBlob = new Blob([resultImg.value.data], { type: imageType});
-        resultImgUrl.value = URL.createObjectURL(originBlob);
-        imageFile = new File([originBlob], imgName,  { type: imageType});
+        resultImgUrl.value = URL.createObjectURL(originBlob);  
+        let filename_only = imgPath.split(/(\\|\/)/g).pop() || ''     
+        imageFile = new File([originBlob],  filename_only,  { type: imageType});
         
         
         // console.log(imageFile);
@@ -695,9 +697,9 @@ const inquiry = async () => {
         var result;
         if (usrMode.value === 'try') {
             axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
+            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 
-            result = await axios.get(base + '/result', {
+            result = await axios.get(bkebase + '/api/v1/try_it_out/result', {
                 params: {
                     'image_name': uploadImgName.value,
                 },
@@ -722,10 +724,10 @@ const inquiry = async () => {
                 errorMsg.value = "Something went wrong! Please use smaller iou and try again!";
             } else {
                 runState.value = 'success';
-                var resImgName = result.data.data.image_name;
+                var resImgPath = result.data.data.image_path.replace(/\.\//, '');
                 var resMaskPath = result.data.data.output_paths.mask_image.replace(/\.\//, '');
                 var resJsonPath = result.data.data.output_paths.json.replace(/\.\//, '');
-                getResultInfo(resImgName, resMaskPath, resJsonPath);
+                getResultInfo(resImgPath, resMaskPath, resJsonPath);
             }
         }
     } catch (err) {
