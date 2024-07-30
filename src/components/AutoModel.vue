@@ -185,7 +185,7 @@ const userStore = userInfoStore();
 axios.defaults.baseURL =
     process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 // axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-const base = process.env.NODE_ENV === "development" ? "/api" : "";
+// const base = process.env.NODE_ENV === "development" ? "/api" : "";
 const bkebase = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const props = defineProps({
@@ -663,7 +663,7 @@ const getResultInfo = async (imgPath: string, maskPath: string, jsonFilePath: st
         let imageType = resultImg.value.headers['content-type'];
         const originBlob = new Blob([resultImg.value.data], { type: imageType});
         resultImgUrl.value = URL.createObjectURL(originBlob);  
-        let filename_only = imgPath.split(/(\\|\/)/g).pop()     
+        let filename_only = imgPath.split(/(\\|\/)/g).pop() || ''     
         imageFile = new File([originBlob],  filename_only,  { type: imageType});
         
         
