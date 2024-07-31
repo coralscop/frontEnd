@@ -15,14 +15,17 @@
                 <div class="button success">
                     <span @click="createCollectionVisible = true">Create collection</span>
                 </div>
+                <div class="button success">
+                    <span @click="uploadFormVisible = true">Upload Image</span>
+                </div>
         </div>
         <div class="collection-menu">
             <el-menu :default-active="activeIndex" mode="horizontal">
-                <el-menu-item index="1">All Images</el-menu-item>
-                <el-menu-item index="2">Collection</el-menu-item>
+                <el-menu-item index="1" @click="menuHandler(1)">All Images</el-menu-item>
+                <el-menu-item index="2" @click="menuHandler(2)">Collection</el-menu-item>
             </el-menu>
         </div>
-        <div class="collection-content">
+        <div class="collection-content" v-if="activeIndex==1">
             <div class="collection-statistic">
                 <svg t="1719857738915" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="11490" width="24" height="24">
@@ -87,7 +90,7 @@
             </el-row>
         </div>
 
-        <div class="collection-list">
+        <div class="collection-list" v-if="activeIndex == 2">
             <div class="collection-statistic">
                 <svg t="1719857738915" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="11490" width="24" height="24">
@@ -159,7 +162,19 @@
                     <el-input v-model="newImageData.longitude" @blur="handleUpdateSite" />
                 </el-form-item>
                 <el-form-item label="Site" prop="site">
-                    <span>{{ newImageData.site }}</span>
+                    <el-select
+                        v-model="collectionOfNewImage"
+                        placeholder="Select collection"
+                        size="large"
+                        style="width: 240px"
+                        >
+                        <el-option
+                            v-for="item in collectionList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id"
+                        />
+                        </el-select>
                     <!-- <el-input v-model="newImageData.site" /> -->
                 </el-form-item>
                 <el-form-item label="Images" prop="imageFile">
@@ -326,6 +341,7 @@ const newImageData = ref({
     longitude: 114.32,
     site: 'Hong Kong',
 })
+const collectionOfNewImage = ref();
 const newImageRules = ref({
     imageFile: [{
         required: true,
@@ -365,7 +381,13 @@ const newCollectionRules = ref({
 })
 
 const collectionList = ref();
-const totalCollectionNum = ref(0)
+const totalCollectionNum = ref(0);
+
+const collectionOptions = ref([]);
+
+const menuHandler = (idx) => {
+    activeIndex.value = idx;
+}
 
 const getAllUsrImages = async () => {
     try {
@@ -425,6 +447,13 @@ const getAllOfUserCollections = async () => {
                 newItem['bpCheck'] = false;
                 return newItem;
             }));
+
+            collectionOptions.value = await collectionList.value.map(async (item) => ({
+                value: item['id'],
+                label: item['name']
+                })
+            )
+
             totalCollectionNum.value = collectionList.value.length;
         }
     } catch (error) {
@@ -460,7 +489,8 @@ const uploadUsrImage = async (formData: FormData) => {
         // https://coralscop-bke.hkustvgd.com/api/v1/inference/upload
         axios.defaults.baseURL =
             process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-        const result = await axios.post(bkebase + '/api/v1/inference/upload', formData, {
+            let collection_id = collectionOfNewImage.value;
+        const result = await axios.post(bkebase + `/api/v1/collection/${collection_id}/images`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: 'Bearer ' + userStore.userInfo.token
@@ -1018,7 +1048,7 @@ onMounted(() => {
 
 .user-tools {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: start;
     color: black;
     padding-left: 72px;
@@ -1028,7 +1058,7 @@ onMounted(() => {
     border: 2px solid black;
     background-color: white;
     color: black;
-    padding: 14px 28px;
+    padding: 5px 10px;
     font-size: 16px;
     cursor: pointer;
 
