@@ -25,7 +25,7 @@
                 <el-menu-item index="2" @click="menuHandler(2)">Collection</el-menu-item>
             </el-menu>
         </div>
-        <div class="collection-content" v-if="activeIndex==1">
+        <div class="collection-content" v-if="activeIndex=='1'">
             <div class="collection-statistic">
                 <svg t="1719857738915" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="11490" width="24" height="24">
@@ -46,7 +46,6 @@
 
                 <div v-show="selectVisible">
                     <el-button class="batch-process-btn collection-btn" @click="handleBatchProcess">Run</el-button>
-                    <el-button class="normal-btn collection-btn" @click="handleConfig">Config</el-button>
                     <el-button class="normal-btn collection-btn" @click="handleDownload">Download</el-button>
                     <el-button class="normal-btn collection-btn" @click="handleCancelSelect">Cancel</el-button>
                 </div>
@@ -90,7 +89,7 @@
             </el-row>
         </div>
 
-        <div class="collection-list" v-if="activeIndex == 2">
+        <div class="collection-list" v-if="activeIndex == '2'">
             <div class="collection-statistic">
                 <svg t="1719857738915" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="11490" width="24" height="24">
@@ -222,6 +221,7 @@
             </template>
             <el-image :src="dialogImageUrl" alt="Preview Image" lazy></el-image>
         </el-dialog>
+        <!-- run model - single image -->
         <el-dialog append-to-body destroy-on-close v-model="imageInfoDialogVisible" width="100%"
             class="image-info-dialog" :show-close="false">
             <template #header="{ close }">
@@ -236,18 +236,60 @@
                 </AutoModel>
             </div>
         </el-dialog>
+        <!-- check result -->
         <el-dialog append-to-body destroy-on-close v-model="imageResultDialogVisible" width="100%" :lock-scroll="true"
             class="image-info-dialog" :show-close="false">
             <template #header="{ close }">
                 <div class="form-title">
+                    <p>Result</p>
+                    <el-icon @click="close">
+                        <Close />
+                    </el-icon>
+                </div>
+            </template>
+            <el-skeleton :rows="10" animated v-if="resultLoading"/>
+            <div class="image-info-content" v-else>
+                <ImageResult :imageUrl="currentImageInfoUrl" :maskUrl="currentMaskUrl" :jsonData="currentJson" :imageFile=imageFile></ImageResult>
+                <!-- <AutoModel :usrMode="'collection'" :imageUrl="currentImageInfoUrl" :imageName="currentImageName"></AutoModel> -->
+            </div>
+        </el-dialog>
+        <!-- run model - batch process -->
+        <el-dialog append-to-body destroy-on-close v-model="runModelDialogVisible" width="50%" :lock-scroll="true"
+        :close-on-click-modal=false :close-on-press-escape=false :show-close="false">
+            <template #header="{ close }">
+                <div class="form-title">
+                    <p>Model</p>
                     <el-icon @click="close">
                         <Close />
                     </el-icon>
                 </div>
             </template>
             <div class="image-info-content">
-                <ImageResult :imageUrl="currentImageInfoUrl" :maskUrl="currentMaskUrl" :jsonData="currentJson"></ImageResult>
-                <!-- <AutoModel :usrMode="'collection'" :imageUrl="currentImageInfoUrl" :imageName="currentImageName"></AutoModel> -->
+                <div class="model-params">
+                    <div class="model-param-head">
+                        <span>Model Parameters</span>
+                    </div>
+
+                    <ul class="model-params-table" >
+                        <li v-for="item in modelParams" class="model-params-item">
+                            <div class="param-item-head">
+                                <span class="param-title">{{ item.title }}
+                                    <div class="param-help">
+                                        <el-icon><QuestionFilled /></el-icon>
+                                        <div class="tooltip">{{ item.tooltip }}</div>
+                                    </div>
+                                </span>
+                                <input class="param-input" v-model=item.value />
+                            </div>
+                            <vue-slider v-model=item.value :min=item.min :max=item.max :interval=item.interval :process-style="{ backgroundColor: '#139FE1' }"
+                                :tooltip-style="{ backgroundColor: '#139FE1', borderColor: '#139FE1' }" :contained="true" >
+                                <template v-slot:dot="{ focus }">
+                                    <div :class="['custom-dot', { focus }]"></div>
+                                </template>
+                            </vue-slider>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </el-dialog>
 
@@ -292,8 +334,10 @@
 import usrBgUrl from '@/assets/P8093252.png'
 
 import type { UploadFile, UploadRequestHandler } from 'element-plus'
-import { UserFilled, Delete, Plus, ZoomIn,Close,CircleCheck } from '@element-plus/icons-vue'
+import { UserFilled, Delete, Plus, ZoomIn,Close,CircleCheck,QuestionFilled } from '@element-plus/icons-vue'
 import { loadImage } from '@/helper/loadImage'
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
 
 // axios setting
 import axios from 'axios'
@@ -333,7 +377,10 @@ const disabled = ref(false)
 const selectVisible = ref(false)
 const selectAll = ref(false)
 
+// result info
+const resultLoading = ref(false);
 const imageResultDialogVisible = ref(false)
+var imageFile:File;
 
 const newImageData = ref({
     imageFile: <File[]>[],
@@ -357,6 +404,47 @@ const newImageRules = ref({
         { pattern: /^-?((([0-8]?[0-9](\.\d+)?)|90(\.0+)?))$/, message: 'Please enter a valid latitude', trigger: 'change' },
     ],
 })
+
+// model config
+const runModelDialogVisible = ref(false);
+var modelParams = ref([
+    {
+        title: "Point Per Side",
+        value: 32,
+        min: 4,
+        max: 64,
+        range: [4, 8, 16, 32, 64],
+        interval: 1,
+        tooltip: "It controls the granularity of the generated masks. Larger values yield longer response times."
+    },
+    {
+        title: "Predicted iou",
+        value: 0.82,
+        min: 0.00,
+        max: 1.00,
+        range: [0, 1],
+        interval: 0.01,
+        tooltip: "It indicates the quality of the generated coral masks. The coral masks with predicted iou below this value will be filtered out.Higher is better."
+    },
+    {
+        title: "Stability score",
+        value: 0.62,
+        min: 0.42,
+        max: 0.82,
+        range: [0.42, 0.82],
+        interval: 0.01,
+        tooltip: "The stability of the generated coral masks"
+    },
+    {
+        title: "Min area",
+        min: 0,
+        max: 100,
+        value: 100,
+        range: [0, 100],
+        interval: 10,
+        tooltip: "Coral masks with areas lower than this value will be removed."
+    },
+]);
 
 
 //Collection
@@ -392,9 +480,6 @@ const menuHandler = (idx) => {
 const getAllUsrImages = async () => {
     try {
         // https://coralscop-bke.hkustvgd.com/api/v1/user/images
-        axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-
         var res = await axios.get(bkebase + '/api/v1/user/images', {
             headers: {
                 Authorization: 'Bearer ' + userStore.userInfo.token
@@ -571,14 +656,14 @@ const submitcreateCollectionForm = async () => {
     const formInstance = newCollectionFormRef.value as any;
     formInstance.validate(async (valid: boolean) => {
         if (valid) {
-            let lat: string = newCollectionData.value.latitude;
-            let long: string = newCollectionData.value.longitude;
+            let lat = newCollectionData.value.latitude;
+            let long = newCollectionData.value.longitude;
             let site_name: string = newCollectionData.value.site.toString();
-            let reqData: dict = {
+            let reqData = {
                 "geo": [long, lat],
                 "name": site_name
             }            
-            await (async (formData: dict) => {
+            await (async (formData) => {
                 try {
                     axios.defaults.baseURL =
                         process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
@@ -651,8 +736,6 @@ const handleImageInfo = (image) => {
 }
 
 const checkResult = async (imageName) => {
-    axios.defaults.baseURL =
-        process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
     var result = await axios.get(bkebase + '/api/v1/inference/result', {
         params: {
             'image_name': imageName,
@@ -677,64 +760,89 @@ const modifyMaskColor = async (imgSrc: string, color: number[]) => {
     
     canvas.height = img.height;
     canvas.width = img.width;
-    if (ctx) {
-        // ctx.globalAlpha = 0.6;
-        ctx.drawImage(img, 0, 0);
-        // maskUrl = canvas.toDataURL();
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-        const data = imageData.data;
-        for (let idx = 0; idx < data.length; idx += 4) {
-            if (data[idx] > 250) {
-                data[idx] = color[0];
-                data[idx + 1] = color[1];
-                data[idx + 2] = color[2];
-                data[idx + 3] = 255*0.6;
-            } else {
-                data[idx] = 0;
-                data[idx + 1] = 0;
-                data[idx + 2] = 0;
-                data[idx + 3] = 0;
-            }
-        }
-        ctx.putImageData(imageData, 0, 0);
-        // resultMaskUrl.value = canvas.toDataURL();
-        canvas.toBlob(blob => {
-            if (blob) currentMaskUrl = URL.createObjectURL(blob);
-        });
+    if (!ctx) {
+        throw new Error('Canvas context is not supported. ');
     }
+    ctx.drawImage(img, 0, 0);
+    // maskUrl = canvas.toDataURL();
+    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+    const data = imageData.data;
+    for (let idx = 0; idx < data.length; idx += 4) {
+        if (data[idx] > 250) {
+            data[idx] = color[0];
+            data[idx + 1] = color[1];
+            data[idx + 2] = color[2];
+            data[idx + 3] = 255*0.6;
+        } else {
+            data[idx] = 0;
+            data[idx + 1] = 0;
+            data[idx + 2] = 0;
+            data[idx + 3] = 0;
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return canvas.toDataURL();
 }
 const coralColor = [78, 1, 136, 53];
 
 const handleResultInfo = async (image) => {
     console.log("==== result info ====");
-    currentImageInfoUrl = 'https://coralscop-bke.hkustvgd.com/usr_imgs/' + image.image_name;
+    imageResultDialogVisible.value = true;
+    resultLoading.value = true;
 
     axios.defaults.baseURL =
     process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
 
-    var resMaskPath = image.output_paths.mask_image.replace(/\.\//, '');
-    var resJsonPath = image.output_paths.json.replace(/\.\//, '');
+    console.log("==== result info:original image ====");
 
-    var resultMask = await axios.get(bkebase + resMaskPath, {
-        responseType: 'arraybuffer',
-        headers: {
-            Authorization: 'Bearer ' + userStore.userInfo.token,
-            // 'Access-Control-Allow-Origin': '*'
-        }
-    });
-    const maskBlob = new Blob([resultMask.data], { type: resultMask.headers['content-type'] });
-    let maskUrl = URL.createObjectURL(maskBlob);
-    modifyMaskColor(maskUrl,coralColor);
+    if (image.originalUrl == '') {
+        var resultImg = await axios.get(bkebase + '/usr_imgs/' + image.image_name, {
+                    responseType: 'arraybuffer',
+                    // withCredentials: true,
+                    headers: {
+                        Authorization: 'Bearer ' + userStore.userInfo.token,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    }
+                });
+        let imageType = resultImg.headers['content-type'];
+        const originBlob = new Blob([resultImg.data], { type: imageType});
+        image.originalUrl = URL.createObjectURL(originBlob);
+        imageFile = new File([originBlob], image.image_name,  { type: imageType});
+    }
+    currentImageInfoUrl = image.originalUrl;
 
-    var json = await axios.get(bkebase + resJsonPath, {
-        headers: {
-            Authorization: 'Bearer ' + userStore.userInfo.token,
-            // 'Access-Control-Allow-Origin': '*'
-        }
-    });
-    currentJson = JSON.stringify(json);
 
-    imageResultDialogVisible.value = true;
+    console.log("==== result info:mask image ====");
+    if (image.maskUrl == '') {
+        var resMaskPath = image.output_paths.mask_image.replace(/\.\//, '');
+        var resultMask = await axios.get(bkebase + resMaskPath, {
+            responseType: 'arraybuffer',
+            headers: {
+                Authorization: 'Bearer ' + userStore.userInfo.token,
+                // 'Access-Control-Allow-Origin': '*'
+            }
+        });
+        const maskBlob = new Blob([resultMask.data], { type: resultMask.headers['content-type'] });
+        let maskUrl = URL.createObjectURL(maskBlob);
+        image.maskUrl = await modifyMaskColor(maskUrl,coralColor);
+    }
+    currentMaskUrl = image.maskUrl;
+    // console.log(currentMaskUrl);
+
+    console.log("==== result info:json file ====");
+    if (image.jsonData == '') {
+        var resJsonPath = image.output_paths.json.replace(/\.\//, '');
+        var json = await axios.get(bkebase + resJsonPath, {
+            headers: {
+                Authorization: 'Bearer ' + userStore.userInfo.token,
+                // 'Access-Control-Allow-Origin': '*'
+            }
+        });
+        image.jsonData = JSON.stringify(json.data);
+    }
+    currentJson = image.jsonData;
+
+    resultLoading.value = false;
 }
 
 const handleUpdateSite = async () => {
@@ -754,16 +862,13 @@ const getSiteName = async (latitude,longitude) => {
 }
 
 const handleSelectAll = (select: boolean) => {
-    imageList.value.map(img => img['bpCheck'] = select);
+    if (imageList.value) imageList.value.map(img => img['bpCheck'] = select);
 }
 
 const handleCancelSelect = () => {
-    imageList.value.map(img => img['bpCheck'] = false);
+    if (imageList.value) imageList.value.map(img => img['bpCheck'] = false);
     selectVisible.value = false;
-}
-
-const handleConfig = () => {
-
+    selectAll.value = false;
 }
 
 const handleDownload = () => {
@@ -771,7 +876,8 @@ const handleDownload = () => {
 }
 
 const handleBatchProcess = () => {
-
+    console.log("=== batch process ===");
+    runModelDialogVisible.value = true;
 }
 
 onMounted(() => {

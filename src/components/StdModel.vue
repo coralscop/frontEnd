@@ -486,10 +486,10 @@ const generateMask = (annoList: any[], height: number, width: number) => {
 
 
     });
-    // return canvas.toDataURL();
-    canvas.toBlob(blob => {
-        if (blob) resultMaskUrl.value = URL.createObjectURL(blob);
-    });
+    resultMaskUrl.value = canvas.toDataURL();
+    // canvas.toBlob(blob => {
+    //     if (blob) resultMaskUrl.value = URL.createObjectURL(blob);
+    // });
 }
 
 const handleStdResult = async () => {

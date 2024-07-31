@@ -66,13 +66,13 @@
                 </div>
             </div>
 
-            <el-button class="result-btn normal-btn" :disabled="!resultImgUrl || !resultMaskUrl">Edit</el-button>
+            <el-button class="result-btn normal-btn" :disabled="!resultImgUrl || !resultMaskUrl" @click="showEdit">Edit</el-button>
             <el-dialog append-to-body width="1200px" top="20px" title="Edit Mask" v-model="dialogEditVisible"
                 :show-close="false" destroy-on-close :close-on-click-modal=false :close-on-press-escape=false
                 class="edit-dialog">
                 <template #header="{ close }">
                     <div class="form-title">
-                        <p>Result</p>
+                        <p>Edit</p>
                         <el-icon @click="close">
                             <Close />
                         </el-icon>
@@ -101,6 +101,7 @@ const props = defineProps({
     maskUrl: { type: String },
     jsonData: { type: String },
     interactiveImg: { type: String },
+    imageFile: {type: File}
 });
 const showMask = ref(true);
 const maskOpacity = ref(0.6);
@@ -131,13 +132,25 @@ const resultJsonUrl = ref('');
 
 const dialogLoading = ref(false);
 const dialogEditVisible = ref(false);
+const interactiveImg = ref('');
 
 const initImageResult = () => {
+    console.log("==== result : initial ====");
+
     resultImgUrl.value = <string>props.imageUrl;
     resultMaskUrl.value = <string>props.maskUrl;
     // console.log(props.jsonData);
-    resultJson.value = <string>props.jsonData;
+    var json = JSON.parse(<string>props.jsonData);
+    var annoList = json.annotations.map(item => {
+        var newItem = item;
+        newItem['label'] = item.label || 'coral';
+        return newItem;
+    });
+    json.annotations = annoList;
+    resultJson.value = JSON.stringify(json);
     resultJsonUrl.value = 'data:application/json;charset=utf-8,' + encodeURIComponent(resultJson.value);
+
+    interactiveImg.value = <string>props.interactiveImg || '';
 }
 const handleDrawByScore = () => {
     // console.log("===change score===");
@@ -145,7 +158,7 @@ const handleDrawByScore = () => {
         // console.log(score.value);
         let resultData = JSON.parse(resultJson.value);
         // console.log(resultData);
-        generateMask(resultData.annotations, resultData.image.height, resultData.image.width);
+        resultMaskUrl.value = generateMask(resultData.annotations, resultData.image.height, resultData.image.width);
 
     });
 }
@@ -204,9 +217,10 @@ const generateMask = (annoList:any[], height:number, width:number) => {
         }
     });
 
-    canvas.toBlob(blob => {
-        if (blob) resultMaskUrl.value = URL.createObjectURL(blob);
-    });
+    // canvas.toBlob(blob => {
+    //     if (blob)  = URL.createObjectURL(blob);
+    // });
+    return canvas.toDataURL();
 }
 const generateResultImg = async (imgSrc: string, maskSrc: string, maskOpa: number) => {
     const canvas = document.createElement('canvas');
@@ -273,6 +287,11 @@ const handleEditResult = async (result) => {
     resultMaskUrl.value = result.editMask;
     
     labelTag.value = result.labels;
+}
+
+const showEdit = async () => {
+    dialogLoading.value = false;
+    dialogEditVisible.value = true;
 }
 
 onMounted(() => {

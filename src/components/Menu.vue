@@ -42,14 +42,14 @@
 
 <script lang="ts" setup>
 import {userInfoStore} from '@/store/user';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 import { jwtDecode } from "jwt-decode";
 
 const showMenu = ref(false);
 const menuInput = ref();
 const logInVisible = ref();
 const signUpVisible = ref();
-const router = useRouter();
+// const router = useRouter();
 
 const userLogin = ref(false);
 const userStore = userInfoStore();

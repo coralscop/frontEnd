@@ -53,11 +53,10 @@
             </div>
         </div>
 
-
+        
         <div class="result-setting">
             <div class="result-container">
                 <div class="img-btn-group" v-if="runState == 'success'">
-                    <!-- <div class="img-btn-group" v-if="true" > -->
                     <div v-show="showMask"  class="mask-tool">
                         <div class="result-label-set">
                             <span class="label-set-title">Label Set</span>
@@ -127,7 +126,6 @@
                     </div>
                 </div>
                 <div class="result-image" v-if="!resultImgUrl && runState == 'fail'">
-                    <!-- <el-tag type="danger">Error</el-tag> -->
                     <span style="display:flex; color: red; font-size:large; font-weight: 600;">{{ errorMsg }}</span>
                 </div>
 
@@ -138,9 +136,7 @@
                     <el-button :class="[runState == 'success' ? 'result-btn  normal-btn' : 'normal-btn']"
                         :disabled="!resultImgUrl || !resultMaskUrl || runState != 'success'">Download&nbsp;
                         ▼</el-button>
-                    <!-- <el-button :class="[runState=='success' ? 'result-btn  normal-btn' : 'normal-btn']" :disabled="false">Download &nbsp; ▼</el-button> -->
                     <div class="download-content" v-if="resultImgUrl && resultMaskUrl && runState == 'success'">
-                        <!-- <div class="download-content" v-if="true"> -->
                         <div class="download-item" @click="downloadResult">ResultImage</div>
                         <div class="download-item" @click="downloadMask">MaskImage</div>
                         <div class="download-item" @click="downloadJson">JsonFile</div>
@@ -160,8 +156,7 @@
                         </div>
                     </template>
                     <el-skeleton :rows="10" animated v-if="dialogLoading"/>
-                    <SegmentEdit v-else :imgName=bkeImgName :jsonData=resultJsonFile :imageUrl=resultImgUrl
-                        :opacity=maskOpacity :score=score @edit-result="handleEditResult">
+                    <SegmentEdit v-else :imgName=bkeImgName :jsonData=resultJsonFile :imageUrl=resultImgUrl :opacity=maskOpacity :score=score @edit-result="handleEditResult">
                     </SegmentEdit>
                 </el-dialog>
 
@@ -197,19 +192,21 @@ const usrMode = ref('try');
 
 const dialogLoading = ref(false);
 const dialogEditVisible = ref(false);
-var imageFile:File;
+// var imageFile:File;
 const showEdit = async () => {
-    if (bkeImgName == '') {
-        dialogLoading.value = true;
-        dialogEditVisible.value = true;
-        let formData = new FormData();
-        formData.append('image_file', imageFile);
-        let uploadBke = await uploadInteractiveImg(formData);
-        if (uploadBke) dialogLoading.value = false;
-    } else {
-        dialogLoading.value = false;
-        dialogEditVisible.value = true;
-    }
+    // if (bkeImgName == '') {
+    //     dialogLoading.value = true;
+    //     dialogEditVisible.value = true;
+    //     let formData = new FormData();
+    //     formData.append('image_file', imageFile);
+    //     let uploadBke = await uploadInteractiveImg(formData);
+    //     if (uploadBke) dialogLoading.value = false;
+    // } else {
+    //     dialogLoading.value = false;
+    //     dialogEditVisible.value = true;
+    // }
+    dialogLoading.value = false;
+    dialogEditVisible.value = true;
 }
 
 const mode = ref('auto');
@@ -338,8 +335,6 @@ const changeParams = (value: string, index: number) => {
     // console.log(modelParams);
 }
 const uploadToSvr = async (formData: FormData) => {
-    axios.defaults.baseURL =
-        process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
     try {
         console.log("===upload===");
         // console.log(process.env.NODE_ENV);
@@ -350,7 +345,7 @@ const uploadToSvr = async (formData: FormData) => {
             },
             onUploadProgress(e) {
                 // console.log(e.event);
-                imgProgress.value = Number(((e.event.loaded / e.event.total) * 50).toFixed(2));
+                imgProgress.value = Number(((e.event.loaded / e.event.total) * 99).toFixed(2));
             },
         });
         uploadImgName.value = result.data.image_name;
@@ -360,31 +355,27 @@ const uploadToSvr = async (formData: FormData) => {
     }
 }
 
-const uploadInteractiveImg = async (formData: FormData) => {
-    try {
-        console.log("===upload interactive===");
-        // console.log(process.env.NODE_ENV);
-        // console.log(base);
-        axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
+// const uploadInteractiveImg = async (formData: FormData) => {
+//     try {
+//         console.log("===upload interactive===");
 
-        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            onUploadProgress(e) {
-                // console.log(e.event);
-                imgProgress.value = Number(((e.event.loaded / e.event.total) * 50 + 50).toFixed(2));
-            },
-        });
-        // console.log(result);
-        bkeImgName = result.data.image_name;
-        return true;
-    } catch (err) {
-        console.error(err);
-        return false;
-    }
-}
+//         const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
+//             headers: {
+//                 'Content-Type': 'multipart/form-data',
+//             },
+//             onUploadProgress(e) {
+//                 // console.log(e.event);
+//                 imgProgress.value = Number(((e.event.loaded / e.event.total) * 100).toFixed(2));
+//             },
+//         });
+//         // console.log(result);
+//         bkeImgName = result.data.image_name;
+//         return true;
+//     } catch (err) {
+//         console.error(err);
+//         return false;
+//     }
+// }
 var bkeImgName: string = '';
 // var imgFile:File;
 const handleUploadImg = async (item) => {
@@ -450,8 +441,6 @@ const runModel = async () => {
             var result;
             startRunTime();
             if (usrMode.value === 'try') {
-                axios.defaults.baseURL =
-                process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 
                 result = await axios.post(bkebase + '/api/v1/try_it_out/enqueue', params, {
                     headers: {
@@ -460,8 +449,6 @@ const runModel = async () => {
                 });
             } else if (usrMode.value === 'collection') {
                 // https://coralscop-bke.hkustvgd.com/api/v1/inference/enqueue
-                axios.defaults.baseURL =
-                process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
                 result = await axios.post(bkebase + '/api/v1/inference/enqueue', params, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -526,10 +513,10 @@ const modifyMaskColor = (imgSrc: string, color: number[]) => {
                 }
             }
             ctx.putImageData(imageData, 0, 0);
-            // resultMaskUrl.value = canvas.toDataURL();
-            canvas.toBlob(blob => {
-                if (blob) resultMaskUrl.value = URL.createObjectURL(blob);
-            })
+            resultMaskUrl.value = canvas.toDataURL();
+            // canvas.toBlob(blob => {
+            //     if (blob) resultMaskUrl.value = URL.createObjectURL(blob);
+            // })
         }
     }
 }
@@ -603,25 +590,11 @@ const generateMask = (annoList:any[], height:number, width:number) => {
     });
 }
 
-// const getImageFileFromUrl = async (imgUrl: string, imgName:string) => {
-//     const img = await loadImage(imgUrl);
-//     const canvas = document.createElement('canvas');
-//     canvas.height = img.height;
-//     canvas.width = img.width;
-//     const ctx = canvas.getContext('2d');
-//     ctx?.drawImage(img, 0, 0);
-//     canvas.toBlob(blob => {
-//         if (blob) imageFile = new File([blob], imgName);
-//     });
-// }
-
 const getResultInfo = async (imgPath: string, maskPath: string, jsonFilePath: string) => {
     try {
         console.log("===result===");
         var json;
         if (usrMode.value == 'try') {
-            axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 
             resultImg.value = await axios.get(bkebase + imgPath, {
                 responseType: 'arraybuffer'
@@ -634,37 +607,35 @@ const getResultInfo = async (imgPath: string, maskPath: string, jsonFilePath: st
             json = await axios.get(bkebase + jsonFilePath);
 
         } else if (usrMode.value === 'collection') {
-            axios.defaults.baseURL =
-                process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
 
-                resultMask.value = await axios.get(bkebase + maskPath, {
-                    responseType: 'arraybuffer',
-                    headers: {
-                        Authorization: 'Bearer ' + userStore.userInfo.token,
-                        // 'Access-Control-Allow-Origin': '*'
-                    }
-                });
-                json = await axios.get(bkebase + jsonFilePath, {
-                    headers: {
-                        Authorization: 'Bearer ' + userStore.userInfo.token,
-                        // 'Access-Control-Allow-Origin': '*'
-                    }
-                });
+            resultMask.value = await axios.get(bkebase + maskPath, {
+                responseType: 'arraybuffer',
+                headers: {
+                    Authorization: 'Bearer ' + userStore.userInfo.token,
+                    // 'Access-Control-Allow-Origin': '*'
+                }
+            });
+            json = await axios.get(bkebase + jsonFilePath, {
+                headers: {
+                    Authorization: 'Bearer ' + userStore.userInfo.token,
+                    // 'Access-Control-Allow-Origin': '*'
+                }
+            });
 
-                resultImg.value = await axios.get(bkebase + imgPath, {
-                    responseType: 'arraybuffer',
-                    // withCredentials: true,
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    }
-                });
+            resultImg.value = await axios.get(bkebase + imgPath, {
+                responseType: 'arraybuffer',
+                // withCredentials: true,
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                }
+            });
         }
         
         let imageType = resultImg.value.headers['content-type'];
         const originBlob = new Blob([resultImg.value.data], { type: imageType});
         resultImgUrl.value = URL.createObjectURL(originBlob);  
-        let filename_only = imgPath.split(/(\\|\/)/g).pop() || ''     
-        imageFile = new File([originBlob],  filename_only,  { type: imageType});
+        // let filename_only = imgPath.split(/(\\|\/)/g).pop() || ''     
+        // imageFile = new File([originBlob],  filename_only,  { type: imageType});
         
         
         // console.log(imageFile);
@@ -696,8 +667,6 @@ const inquiry = async () => {
         console.log("=== "+usrMode.value+" inquiry ===");
         var result;
         if (usrMode.value === 'try') {
-            axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 
             result = await axios.get(bkebase + '/api/v1/try_it_out/result', {
                 params: {
@@ -706,8 +675,6 @@ const inquiry = async () => {
             });
         } else if (usrMode.value === 'collection') {
             // https://coralscop-bke.hkustvgd.com/api/v1/inference/result
-            axios.defaults.baseURL =
-                process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
             result = await axios.get(bkebase + '/api/v1/inference/result', {
                 params: {
                     'image_name': uploadImgName.value,
@@ -852,37 +819,6 @@ const initAutoModel = async () => {
         imageUrl.value = <string>props.imageUrl;
         uploadImgName.value = <string>props.imageName;
     }
-    // let testurl = 'https://coralscop-test.hkustvgd.com/usr_imgs/f2815d25-5097-438d-830a-4b459bdb68d6.jpeg';
-    // let testres = await axios.get(testurl);
-    // console.log(testres);
-
-    // fetch("https://coralscop-bke.hkustvgd.com/usr_imgs/b4ed6aee-ab1c-4bab-ad60-04441fe52e7f.jpg", {
-    //     method: "GET",  
-    //     headers: {
-    //         'Access-Control-Allow-Origin': '*',
-    //     }})
-    //     .then(res => console.log(res))
-    //     .catch(function(error) {
-    //     error.message
-    // })
-
-    // let bkeurl = 'https://coralscop-bke.hkustvgd.com/usr_imgs/b4ed6aee-ab1c-4bab-ad60-04441fe52e7f.jpg';
-    // let bkeres = await axios.get(bkeurl, {responseType:'arraybuffer'});
-    // console.log(bkeres);
-    // fetch(bkeurl, {
-    //     method: "GET",
-    //     // mode: 'no-cors',
-    //     headers: {
-    //         Authorization: 'Bearer ' + userStore.userInfo.token,
-    //         // 'Access-Control-Allow-Origin': '*'
-    //     }
-    // })
-    // .then(res => {
-    //     console.log(res);
-    // })
-    // .catch(function(error) {
-    //     error.message
-    // });
 }
 
 onMounted(() => {
