@@ -74,7 +74,7 @@
                         class="batch-process-checkbox" />
                     <el-card shadow="hover" :body-style="{ padding: '10px', boxSizing: 'border-box', width: '100%' }">
                         <svg v-show="item.isDone" style="position: absolute; top:0; right: 0; z-index: 15;" width="50" height="50" xmlns="http://www.w3.org/2000/svg" t="1721791036512" class="icon" version="1.1" p-id="47307"><g><title>Layer 1</title><g><g><title>Layer 1</title><g stroke="null"><g stroke="null"><title stroke="null">Layer 1</title><g stroke="null"><path p-id="47308" fill="#409eff" d="m-0.10472,-0.12324l23.02389,0l27.18556,27.22487l0,23.02162l-50.20945,-50.24649l0,-0.00001l0,0.00001z" stroke="null"/></g><text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_8" y="44.82062" x="28.67433" stroke-width="0" fill="#ffffff" transform="matrix(0.352269 0.355564 -0.354549 0.353278 22.1903 -16.543)" stroke="null">DONE</text></g></g></g></g></g></svg>
-                        <el-image :src="'https://coralscop-bke.hkustvgd.com/usr_imgs/' + item.image_name"
+                        <el-image :src="'https://coralscop-bke.hkustvgd.com/' + item.image_file_path"
                             lazy></el-image>
                         <div class="collection-item-info">
                             <p class="collection-item-site">Site: {{ item.loc }} - {{formatNumber(item.geo.coordinates[0], 2) }},{{ formatNumber(item.geo.coordinates[1], 2)}}</p>
@@ -308,14 +308,14 @@
                 :rules="newCollectionRules" :label-position="'left'" style="max-width: 600px; margin: 20px;"
                 label-width="auto" status-icon>
                 <el-form-item label="Latitude" prop="latitude">
-                    <el-input v-model="newImageData.latitude" @blur="handleUpdateSite" />
+                    <el-input v-model="newCollectionData.latitude" @blur="handleUpdateSite" />
                 </el-form-item>
                 <el-form-item label="Longitude" prop="longitude">
-                    <el-input v-model="newImageData.longitude" @blur="handleUpdateSite" />
+                    <el-input v-model="newCollectionData.longitude" @blur="handleUpdateSite" />
                 </el-form-item>
                 <el-form-item label="Site name" prop="site">
                     <!-- <span>{{ newImageData.site }}</span> -->
-                    <el-input v-model="newImageData.site" />
+                    <el-input v-model="newCollectionData.site" clearable />
                 </el-form-item>                
                 <div class="middle-form-item">
                     <el-button type="primary" @click="submitcreateCollectionForm">Create</el-button>
@@ -466,6 +466,9 @@ const newCollectionRules = ref({
         { required: true, message: 'Please enter the latitude', trigger: 'change' },
         { pattern: /^-?((([0-8]?[0-9](\.\d+)?)|90(\.0+)?))$/, message: 'Please enter a valid latitude', trigger: 'change' },
     ],
+    site: [
+    { required: true, message: 'Please enter the sie name', trigger: 'change' },
+    ]
 })
 
 const collectionList = ref();
