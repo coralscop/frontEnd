@@ -13,7 +13,7 @@
                 <el-icon  @click="close"><Close /></el-icon>
             </div>
         </template>
-        <el-form ref="loginFormRef" class="form" :model="loginData" :rules="loginDataRules" :label-position="'top'" style="max-width: 600px; margin: 20px;" label-width="auto">
+        <el-form v-if="loginResult == 'ready'" ref="loginFormRef" class="form" :model="loginData" :rules="loginDataRules" :label-position="'top'" style="max-width: 600px; margin: 20px;" label-width="auto">
             
             <el-form-item label="Email" prop="email"><el-input v-model="loginData.email" clearable placeholder="Enter email" /></el-form-item>
                 
@@ -25,10 +25,10 @@
             <p class="signup-link">
                 No account?
                 <span class="link-span" @click="handleTurnSignup">Sign up</span>
-            </p>
-            <p style="color: green;" class="tips">{{ successMsg }}</p>
+            </p>            
             <p style="color: red;" class="tips">{{ errorMsg }}</p>
         </el-form>
+        <el-result v-if="loginResult == 'success'" icon="success" title="Successfully Login" sub-title="Please wait a moment ..."></el-result>
     </el-dialog>
 </template>
 
@@ -66,6 +66,7 @@ const userStore = userInfoStore();
 const emit = defineEmits(['openSignup']);
 const errorMsg = ref('');
 const successMsg = ref('');
+const loginResult = ref('ready');
 
 const handleLogin = async () => {
     try {
@@ -97,6 +98,7 @@ const handleLogin = async () => {
             }
             userStore.setUserInfo(cookieData);
             userStore.setIsLogin(true);
+            loginResult.value = 'success';
 
             window.location.reload();
         } else {

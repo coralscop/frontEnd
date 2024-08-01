@@ -464,7 +464,7 @@ const runModel = async () => {
                 clearTimeout(Number(timer));
                 while (runState.value == 'loading' && runTimeMilSec.value < 60000) {
                     // console.log(runTimeMilSec);
-                    await pollingInquiry();
+                    await pollingInquiry(params);
                 }
                 stopRunTime();
                 if (runState.value == 'loading' && runTimeMilSec.value >= 60000) {
@@ -662,7 +662,7 @@ const getResultInfo = async (imgPath: string, maskPath: string, jsonFilePath: st
     }
 }
 
-const inquiry = async () => {
+const inquiry = async (params) => {
     try {
         console.log("=== "+usrMode.value+" inquiry ===");
         var result;
@@ -670,14 +670,14 @@ const inquiry = async () => {
 
             result = await axios.get(bkebase + '/api/v1/try_it_out/result', {
                 params: {
-                    'image_name': uploadImgName.value,
+                    'image_name': params.image_name,
                 },
             });
         } else if (usrMode.value === 'collection') {
             // https://coralscop-bke.hkustvgd.com/api/v1/inference/result
             result = await axios.get(bkebase + '/api/v1/inference/result', {
                 params: {
-                    'image_name': uploadImgName.value,
+                    'image_name': params.image_name,
                 },
                 headers: {
                     Authorization: 'Bearer ' + userStore.userInfo.token
@@ -702,10 +702,10 @@ const inquiry = async () => {
     }
 }
 
-const pollingInquiry = () => {
+const pollingInquiry = (params) => {
     return new Promise(resolve => {
         timer = setTimeout(async () => {
-            const result = await inquiry();
+            const result = await inquiry(params);
             resolve(result);
         }, 500);
     });
@@ -817,7 +817,7 @@ const initAutoModel = async () => {
     if (usrMode.value == 'collection') {
         upload.value = false;
         imageUrl.value = <string>props.imageUrl;
-        uploadImgName.value = <string>props.imageName;
+        uploadImgName.value = <string>props.imageName;        
     }
 }
 

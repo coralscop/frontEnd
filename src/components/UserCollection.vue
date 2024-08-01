@@ -11,20 +11,16 @@
                 <span style="color: black;">{{ userStore.userInfo.fullname }}</span>
             </div>
         </div>
-        <div class="user-tools">
-                <div class="button success">
-                    <span @click="createCollectionVisible = true">Create collection</span>
-                </div>
-                <div class="button success">
-                    <span @click="uploadFormVisible = true">Upload Image</span>
-                </div>
-        </div>
-        <div class="collection-menu">
-            <el-menu :default-active="activeIndex" mode="horizontal">
-                <el-menu-item index="1" @click="menuHandler(1)">All Images</el-menu-item>
-                <el-menu-item index="2" @click="menuHandler(2)">Collection</el-menu-item>
-            </el-menu>
-        </div>
+        <el-row style="margin-bottom: 20px;">
+            <el-col :span="2" :offset="1"><el-button @click="createCollectionVisible = true" type="primary" plain round size="large" >Create collection</el-button></el-col>
+            <el-col :span="1"><el-button @click="uploadFormVisible = true" type="primary" plain round size="large" >Upload Image</el-button></el-col>
+            <el-col :span="21"></el-col>
+        </el-row>
+        <el-tabs v-model="activeIndex" :default-active="activeIndex" class="collection-menu">
+            <el-tab-pane label="All Images" name="1">All Images</el-tab-pane>
+            <el-tab-pane label="Collection" name="2">Collection</el-tab-pane>
+        </el-tabs>
+
         <div class="collection-content" v-if="activeIndex=='1'">
             <div class="collection-statistic">
                 <svg t="1719857738915" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -80,7 +76,7 @@
                             <p class="collection-item-site">Site: {{ item.loc }} - {{formatNumber(item.geo.coordinates[0], 2) }},{{ formatNumber(item.geo.coordinates[1], 2)}}</p>
                             <ul class="collection-item-tool">
                                 <li class="collection-item-btn" @click="handleImageInfo(item)"><span v-if="item.isDone">Rerun</span><span v-else>Run</span></li>
-                                <li class="collection-item-btn"  @click="handleResultInfo(item)">Result</li>
+                                <li class="collection-item-btn" v-if="item.isDone"  @click="handleResultInfo(item)">Result</li>
                             </ul>
                         </div>
                     </el-card>
@@ -735,7 +731,7 @@ const formatNumber = (numberString, precision) => {
 const handleImageInfo = (image) => {
     imageInfoDialogVisible.value = true;
     currentImageName = image.image_name;
-    currentImageInfoUrl = 'https://coralscop-bke.hkustvgd.com/usr_imgs/' + image.image_name;
+    currentImageInfoUrl = 'https://coralscop-bke.hkustvgd.com/' + image.image_file_path;
 }
 
 const checkResult = async (imageName) => {
@@ -788,7 +784,7 @@ const modifyMaskColor = async (imgSrc: string, color: number[]) => {
 }
 const coralColor = [78, 1, 136, 53];
 
-const handleResultInfo = async (image) => {
+const handleResultInfo = async (image) => {    
     console.log("==== result info ====");
     imageResultDialogVisible.value = true;
     resultLoading.value = true;
@@ -919,6 +915,10 @@ onMounted(() => {
         font-weight: 600;
         ;
     }
+}
+
+.collection-menu {
+    padding-left: 72px;
 }
 
 .collection-menu .el-menu {
@@ -1155,33 +1155,4 @@ onMounted(() => {
 }
 
 
-.user-tools {
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    color: black;
-    padding-left: 72px;
-}
-
-.user-tools .button {
-    border: 2px solid black;
-    background-color: white;
-    color: black;
-    padding: 5px 10px;
-    font-size: 16px;
-    cursor: pointer;
-
-}
-
-/* Green */
-.user-tools .button.success {
-  border-color: #04AA6D;
-  color: green;
-}
-
-.user-tools .button.success:hover {
-  background-color: #04AA6D;
-  color: white;
-}
-
-</style>
+</style> 
