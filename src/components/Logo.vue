@@ -1,7 +1,7 @@
 <template>
     <div class="home-logo" @click="handleBackHome">
         <el-image style="width:60px;height:50px;padding:5px 5px 0 5px;border-radius: 16px;background-color: white;" :src="logoUrl" lazy></el-image>
-        <p>Coral<br>SCOP</p>
+        <el-text><p>Coral<br>SCOP</p></el-text>
     </div>
 </template>
 
