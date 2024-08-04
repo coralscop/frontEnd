@@ -11,16 +11,18 @@
                 <li class="menu-items" v-for="(item, index) in navList" :key="index">
                     <RouterLink :to="item.path" class="menu-item" active-class="active-menu-item" @click="handleRoute" >{{ item.title }}</RouterLink>
                 </li>
-
-                <li class="menu-items" @click="handleShowLogin" v-if="!userLogin">
+                <li class="menu-items" v-if="isLogin">
+                    <RouterLink :to="'collection'" class="menu-item" active-class="active-menu-item" @click="handleRoute" >Collection</RouterLink>
+                </li>
+                <li class="menu-items" @click="handleShowLogin" v-if="!isLogin">
                     <span class="menu-item">Log In</span>
                     <Login ref=logInVisible @openSignup="handleTurnSignup"></Login>
                 </li>
-                <li class="menu-items" @click="handleShowSignup" v-if="!userLogin">
+                <li class="menu-items" @click="handleShowSignup" v-if="!isLogin">
                     <span class="menu-item">Sign Up</span>
                     <Signup ref=signUpVisible @openLogin="handleTurnLogin"></Signup>
                 </li>
-                <li class="menu-items" @click="handleLogout" v-if="userLogin">
+                <li class="menu-items" @click="handleLogout" v-if="isLogin">
                     <span class="menu-item">Log out</span>
                 </li>
             </ul>
@@ -42,17 +44,19 @@
 
 <script lang="ts" setup>
 import {userInfoStore} from '@/store/user';
-// import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { jwtDecode } from "jwt-decode";
+import { storeToRefs } from 'pinia';
 
 const showMenu = ref(false);
 const menuInput = ref();
 const logInVisible = ref();
 const signUpVisible = ref();
-// const router = useRouter();
+const router = useRouter();
 
 const userLogin = ref(false);
 const userStore = userInfoStore();
+const { isLogin } = storeToRefs(userStore);
 
 var navList = [{
     title: 'Home',
@@ -66,10 +70,6 @@ var navList = [{
     title: 'User Manual',
     path: '/usermanual',
     show: true,
-},{
-    title: 'Collection',
-    path: '/collection',
-    show: userStore.isLogin,
 }];
 
 const handleShowMenu = () => {
@@ -91,15 +91,14 @@ const handleShowSignup = () => {
 const handleTurnSignup = () => {
     handleShowSignup();
 }
-const handleTurnLogin = () => {
+const handleTurnLogin = () => {    
     handleShowLogin();
 }
 
 const handleLogout = () => {
     userStore.clearUserInfo();
     userLogin.value = false;
-    //router.push('/');
-    window.location.href = "/"
+    router.push('/');    
 }
 const checkTokenExp = (token:string) => {
     interface BKEToken {

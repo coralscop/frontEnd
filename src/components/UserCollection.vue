@@ -330,7 +330,7 @@
                 sub-title="Please check in collection page"></el-result>
         </el-dialog>
 
-        <UserProfile ref=showUserProfileDialog @openSignup="openUpdateProfileDialog"></UserProfile>
+        <UserProfile ref=showUserProfileDialog @openUserProfile="openUpdateProfileDialog"></UserProfile>
 
     </div>
     <el-backtop :right="30" :bottom="50" />
@@ -878,7 +878,7 @@ const getSiteName = async (latitude,longitude) => {
             }
         });
     }
-    catch (err) {
+    catch (err: any) {
         console.log(err.response.data)        
         return null;
     }    

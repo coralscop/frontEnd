@@ -19,7 +19,7 @@ export const userInfoStore = defineStore('userInfo', {
                 this.userInfo = userInfo;
             }
             return this.userInfo;     
-          }
+        }
     },
     actions: {
         setIsLogin(login: boolean) {

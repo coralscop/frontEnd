@@ -37,6 +37,17 @@ import axios from 'axios'
 import { userInfoStore } from '@/store/user'
 import { Close } from '@element-plus/icons-vue'
 import { FormRules } from 'element-plus';
+import { useRouter } from 'vue-router';
+import { onMounted, nextTick } from 'vue';
+const { currentRoute, push} = useRouter();
+
+onMounted( async () => {
+    await nextTick();
+    if (currentRoute.value.name == 'login') {
+        open();
+    }
+})
+
 // axios api setting
 axios.defaults.baseURL =
   process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
@@ -98,14 +109,16 @@ const handleLogin = async () => {
             }
             userStore.setUserInfo(cookieData);
             userStore.setIsLogin(true);
-            loginResult.value = 'success';
+            loginResult.value = 'success';            
+            push({
+                path: currentRoute.value.query.redirect?.toString() || '/',
+            });
 
-            window.location.reload();
         } else {
             errorMsg.value = result.data.detail[0].msg;
             ElMessage.success(result.data.message);
         }
-        console.log(userStore.isLogin);
+        // console.log(userStore.isLogin);
         
     } catch (err: any) {
         console.error(err);
