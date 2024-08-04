@@ -59,6 +59,7 @@ import L, { Point } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import axios from 'axios'
+import {apiInstance} from '@/services/api';
 
 // axios api setting
 const bkeUrl = "https://coralscop-bke.hkustvgd.com";
@@ -85,7 +86,7 @@ var publicIcon = L.icon({
 // });
 
 const getSummaryData = async () => {
-    var res = await axios.get(base+'/api/v1/summary/images');
+    var res = await apiInstance.get('/summary/images');
     summaryData = res.data;
     // console.log(summaryData);
     imageNum.value = summaryData.length;

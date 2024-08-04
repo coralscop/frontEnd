@@ -5,6 +5,7 @@
         <span></span>
         <span></span>
     </label>
+    <Transition name="transision-menu">
     <div class="menu" v-show="showMenu">
         <nav>
             <ul class="menu-content list-style-none">
@@ -40,6 +41,7 @@
         </div>
         
     </div>
+    </Transition>
 </template>
 
 <script lang="ts" setup>
@@ -276,6 +278,20 @@ onMounted(() => {
     a {
         color: #cc9900;
     }
+}
+
+.transision-menu-enter-active {
+  transition: all .3s ease-out;
+}
+
+.transision-menu-leave-active {
+  transition: all .3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.transision-menu-enter-from,
+.transision-menu-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 </style>
   @/store/user

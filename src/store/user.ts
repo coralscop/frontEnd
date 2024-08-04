@@ -7,12 +7,12 @@ export const userInfoStore = defineStore('userInfo', {
             fullname: '',
             email: '',
             token: '',
-        }
+        },
     }),
     persist: {
         enabled: true
     },
-    getters: {
+    getters: {        
         getUserInfo():any {
             const userInfo = JSON.parse(getCookie('userInfo'));
             if (userInfo) {
@@ -48,6 +48,17 @@ export const userInfoStore = defineStore('userInfo', {
                 token: '',
             };
             removeCookie('userInfo');
-          },
+        },
+    }
+})
+
+export const userDataStore = defineStore('userDataStore', {
+    state: () => ({
+        listOfCollections: []
+    }),
+    actions: {
+        updateListOfCollections(newList) {
+            this.listOfCollections = newList;
+        }
     }
 })

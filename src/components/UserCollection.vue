@@ -122,9 +122,9 @@
             </div> -->
 
             <el-row :gutter="0" class="collection-row">
-                <el-col class="collection-col" :xs="10" :sm="7" :md="6" :lg="5" v-for="(item, index) in collectionList"
+                <el-col class="collection-col" :xs="10" :sm="7" :md="6" :lg="5" v-for="(item, index) in listOfCollections"
                     :key="index">
-
+                    
                     <el-checkbox v-model="item.bpCheck" label="" size="large" v-show="selectVisible"
                         class="batch-process-checkbox" />
                     <el-card shadow="hover" :body-style="{ padding: '10px', boxSizing: 'border-box', width: '100%' }">
@@ -172,7 +172,7 @@
                         style="width: 240px"
                         >
                         <el-option
-                            v-for="item in collectionList"
+                            v-for="item in listOfCollections"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id"
@@ -355,8 +355,10 @@ axios.defaults.baseURL =
 // axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 const bkebase = process.env.NODE_ENV === "development" ? "/bke" : "";
 
-import { userInfoStore } from '@/store/user'
+import { userDataStore, userInfoStore } from '@/store/user'
+import { storeToRefs } from "pinia";
 const userStore = userInfoStore();
+const userData = userDataStore();
 
 const emit = defineEmits(['openUserProfile']);
 
@@ -483,10 +485,8 @@ const newCollectionRules = ref({
     ]
 })
 
-const collectionList = ref();
+const {listOfCollections} = storeToRefs(userData);
 const totalCollectionNum = ref(0);
-
-const collectionOptions = ref([]);
 
 const menuHandler = (idx) => {
     activeIndex.value = idx;
@@ -538,23 +538,17 @@ const getAllOfUserCollections = async () => {
         });
         // console.log(res);
         if (res.status == 200) {
-            collectionList.value = res.data;
             // console.log(imageList.value);
-            collectionList.value = await Promise.all(collectionList.value.map(async (item) => {
+            let newList = await Promise.all(res.data.map(async (item) => {
                 var newItem = item;                
                 var sitename = await getSiteName(item['geo']['coordinates'][1],item['geo']['coordinates'][0])                
                 newItem['loc'] = sitename || item['name'];
                 newItem['bpCheck'] = false;
                 return newItem;
             }));            
+            userData.updateListOfCollections(newList);
 
-            collectionOptions.value = await collectionList.value.map(async (item) => ({
-                value: item['id'],
-                label: item['name']
-                })
-            )
-
-            totalCollectionNum.value = collectionList.value.length;
+            totalCollectionNum.value = res.data.length;
         }
     } catch (error) {
         console.error(error);

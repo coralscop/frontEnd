@@ -4,7 +4,10 @@ import piniaPersist from 'pinia-plugin-persist'
 import './style.css'
 import App from './App.vue'
 import router from './router'
-import { getCookie } from './store/cookies'
+import { userInfoStore } from './store/user'
+
+import setupInterceptors from './services/setupInterceptors';
+setupInterceptors(userInfoStore);
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -14,7 +17,7 @@ app.use(pinia)
 app.mount('#app')
 
 router.beforeEach((to, from, next) => {
-  let isLogin = getCookie('isLogin');
+  let isLogin = userInfoStore().isLogin;
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
       // this route requires auth, check if logged in

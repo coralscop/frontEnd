@@ -175,13 +175,15 @@ import JSZip from "jszip"
 import { loadImage } from '@/helper/loadImage'
 import { rleArrToBinaryMask,rleFromString } from '@/helper/maskUtils'
 import { userInfoStore } from '@/store/user'
+import {apiInstance, staticFileInstance} from '@/services/api'
 const userStore = userInfoStore();
+
 // axios api setting
-axios.defaults.baseURL =
-    process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
+// axios.defaults.baseURL =
+//     process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com";
 // axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 // const base = process.env.NODE_ENV === "development" ? "/api" : "";
-const bkebase = process.env.NODE_ENV === "development" ? "/bke" : "";
+// const bkebase = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const props = defineProps({
     usrMode: {type: String},
@@ -339,7 +341,7 @@ const uploadToSvr = async (formData: FormData) => {
         console.log("===upload===");
         // console.log(process.env.NODE_ENV);
         // console.log(base);
-        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
+        const result = await apiInstance.post('/try_it_out/uploadImage', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -442,14 +444,14 @@ const runModel = async () => {
             startRunTime();
             if (usrMode.value === 'try') {
 
-                result = await axios.post(bkebase + '/api/v1/try_it_out/enqueue', params, {
+                result = await apiInstance.post('/try_it_out/enqueue', params, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
                 });
             } else if (usrMode.value === 'collection') {
                 // https://coralscop-bke.hkustvgd.com/api/v1/inference/enqueue
-                result = await axios.post(bkebase + '/api/v1/inference/enqueue', params, {
+                result = await apiInstance.post('/inference/enqueue', params, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: 'Bearer ' + userStore.userInfo.token
@@ -596,33 +598,33 @@ const getResultInfo = async (imgPath: string, maskPath: string, jsonFilePath: st
         var json;
         if (usrMode.value == 'try') {
 
-            resultImg.value = await axios.get(bkebase + imgPath, {
+            resultImg.value = await staticFileInstance.get(imgPath, {
                 responseType: 'arraybuffer'
             });
 
-            resultMask.value = await axios.get(bkebase + maskPath, {
+            resultMask.value = await staticFileInstance.get(maskPath, {
                 responseType: 'arraybuffer'
             });
 
-            json = await axios.get(bkebase + jsonFilePath);
+            json = await staticFileInstance.get(jsonFilePath);
 
         } else if (usrMode.value === 'collection') {
 
-            resultMask.value = await axios.get(bkebase + maskPath, {
+            resultMask.value = await staticFileInstance.get(maskPath, {
                 responseType: 'arraybuffer',
                 headers: {
                     Authorization: 'Bearer ' + userStore.userInfo.token,
                     // 'Access-Control-Allow-Origin': '*'
                 }
             });
-            json = await axios.get(bkebase + jsonFilePath, {
+            json = await staticFileInstance.get(jsonFilePath, {
                 headers: {
                     Authorization: 'Bearer ' + userStore.userInfo.token,
                     // 'Access-Control-Allow-Origin': '*'
                 }
             });
 
-            resultImg.value = await axios.get(bkebase + imgPath, {
+            resultImg.value = await staticFileInstance.get(imgPath, {
                 responseType: 'arraybuffer',
                 // withCredentials: true,
                 headers: {
@@ -668,14 +670,14 @@ const inquiry = async (params) => {
         var result;
         if (usrMode.value === 'try') {
 
-            result = await axios.get(bkebase + '/api/v1/try_it_out/result', {
+            result = await apiInstance.get('/try_it_out/result', {
                 params: {
                     'image_name': params.image_name,
                 },
             });
         } else if (usrMode.value === 'collection') {
             // https://coralscop-bke.hkustvgd.com/api/v1/inference/result
-            result = await axios.get(bkebase + '/api/v1/inference/result', {
+            result = await apiInstance.get('/inference/result', {
                 params: {
                     'image_name': params.image_name,
                 },

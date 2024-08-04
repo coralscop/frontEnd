@@ -39,6 +39,7 @@ import { Close } from '@element-plus/icons-vue'
 import { FormRules } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { onMounted, nextTick } from 'vue';
+import {apiInstance} from '@/services/api';
 const { currentRoute, push} = useRouter();
 
 onMounted( async () => {
@@ -87,7 +88,7 @@ const handleLogin = async () => {
         axios.defaults.baseURL =
             process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
 
-        const result = await axios.post(base+'/api/v1/user/login', loginData.value, {
+        const result = await apiInstance.post('/user/login', loginData.value, {
             headers: {
                 'Content-Type': 'application/json',
             },
