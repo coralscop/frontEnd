@@ -170,9 +170,10 @@
 import { Picture, CaretLeft, CaretBottom, Close, QuestionFilled } from '@element-plus/icons-vue'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
-import axios from 'axios'
+// import axios from 'axios'
 import JSZip from "jszip"
 import { loadImage } from '@/helper/loadImage'
+import { downloadFile } from '@/helper/downloadFile'
 import { rleArrToBinaryMask,rleFromString } from '@/helper/maskUtils'
 import { userInfoStore } from '@/store/user'
 import {apiInstance, staticFileInstance} from '@/services/api'
@@ -760,16 +761,6 @@ const handleClear = () => {
     showMask.value = true;
     maskOpacity.value = 0.6;
 }
-
-const downloadFile = (src: string, filename: string) => {
-    const link = document.createElement('a');
-    link.href = src;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
 
 const downloadResult = async () => {
     console.log("===Download Result Image===");

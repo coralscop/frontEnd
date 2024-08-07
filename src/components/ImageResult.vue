@@ -93,6 +93,7 @@
 import { Picture, Close } from '@element-plus/icons-vue'
 import VueSlider from 'vue-slider-component'
 import { loadImage } from '@/helper/loadImage'
+import { downloadFile } from '@/helper/downloadFile'
 import JSZip from "jszip"
 import { rleArrToBinaryMask,rleFromString } from '@/helper/maskUtils'
 
@@ -239,15 +240,6 @@ const generateResultImg = async (imgSrc: string, maskSrc: string, maskOpa: numbe
     ctx.drawImage(mask, 0, 0);
 
     return canvas.toDataURL();
-}
-
-const downloadFile = (src: string, filename: string) => {
-    const link = document.createElement('a');
-    link.href = src;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
 const downloadResult = async () => {

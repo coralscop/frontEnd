@@ -54,7 +54,7 @@ export const userInfoStore = defineStore('userInfo', {
 
 export const userDataStore = defineStore('userDataStore', {
     state: () => ({
-        listOfCollections: []
+        listOfCollections: <any>[]
     }),
     actions: {
         updateListOfCollections(newList) {
