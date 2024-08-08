@@ -33,7 +33,6 @@
 </template>
 
 <script lang="ts" setup>
-import axios from 'axios'
 import { userInfoStore } from '@/store/user'
 import { Close } from '@element-plus/icons-vue'
 import { FormRules } from 'element-plus';
@@ -48,12 +47,6 @@ onMounted( async () => {
         open();
     }
 })
-
-// axios api setting
-axios.defaults.baseURL =
-  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-// axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-const base = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const dialogLogInVisible = ref(false);
 const loginFormRef = ref();
@@ -85,26 +78,25 @@ const handleLogin = async () => {
         console.log("===login===");
         // console.log(process.env.NODE_ENV);
         // console.log(base);
-        axios.defaults.baseURL =
-            process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
 
         const result = await apiInstance.post('/user/login', loginData.value, {
             headers: {
                 'Content-Type': 'application/json',
             },
         });
-        console.log(result);
+        // console.log(result);
         if (result.status == 200) {    
-            successMsg.value = "Successfully login"        
+            successMsg.value = "Successfully login" 
             loginData.value.token = result.data.access_token;
             loginData.value.password = '';
             const {password,...cookieData} = loginData.value;
-            const userInfoResponse = await axios.get(base+'/api/v1/user/', {
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    Authorization: 'Bearer ' + loginData.value.token
-                                                },
-                                            });
+            const userInfoResponse = await apiInstance.get('/user/', 
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + result.data.access_token
+                    },
+                });
             if (userInfoResponse.status == 200) {
                 cookieData.fullname = userInfoResponse.data.fullname;
             }

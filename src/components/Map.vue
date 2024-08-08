@@ -58,15 +58,14 @@
 import L, { Point } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import axios from 'axios'
 import {apiInstance} from '@/services/api';
-
-// axios api setting
+// // axios api setting
+// import axios from 'axios'
 const bkeUrl = "https://coralscop-bke.hkustvgd.com";
-axios.defaults.baseURL =
-  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-// axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-const base = process.env.NODE_ENV === "development" ? "/bke" : "";
+// axios.defaults.baseURL =
+//   process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
+// // axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+// const base = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const locNum = ref(0);
 const imageNum = ref(0);
@@ -86,13 +85,15 @@ var publicIcon = L.icon({
 // });
 
 const getSummaryData = async () => {
+    // console.log(apiInstance.defaults.headers);
+
     var res = await apiInstance.get('/summary/images');
     summaryData = res.data;
     // console.log(summaryData);
     imageNum.value = summaryData.length;
 }
 
-// const myGoogleMapToken = 'AIzaSyDRqsEg7eFHRm0GB1XoLXfG_HY7PectB94';
+// const myGoogleMapToken = '';
 // const GoogleMapGeocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 // // google map
 // const getSiteName = async (latitude,longitude) => {
@@ -109,7 +110,7 @@ const getSummaryData = async () => {
 // }
 // bigdat cloud
 const getSiteName = async (latitude,longitude) => {
-    var res = await axios.get('https://api.bigdatacloud.net/data/reverse-geocode-client', {
+    var res = await apiInstance.get('https://api.bigdatacloud.net/data/reverse-geocode-client', {
         params: {
             latitude: latitude,
             longitude: longitude,

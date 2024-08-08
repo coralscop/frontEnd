@@ -20,6 +20,7 @@
     "leaflet-iconmaterial": "^1.1.0",
     "mathjs": "^13.0.0",
     "merge-images": "^2.0.0",
+    "papaparse": "^5.4.1",
     "pinia": "^2.1.7",
     "pinia-plugin-persist": "^1.0.0",
     "qs": "^6.12.1",

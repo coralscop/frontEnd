@@ -79,13 +79,7 @@ import VueSlider from 'vue-slider-component'
 import { ElInput } from 'element-plus'
 import { rleArrToBinaryMask, rleFromString } from '@/helper/maskUtils'
 import { isPointInPolygon } from '@/helper/pointIn'
-import axios from 'axios'
-// axios api setting
-// const bkeUrl = "https://coralscop-bke.hkustvgd.com";
-axios.defaults.baseURL =
-    process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-// axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-const base = process.env.NODE_ENV === "development" ? "/bke" : "";
+import { apiInstance } from '@/services/api'
 
 interface ImageInfo {
     w: number;
@@ -580,9 +574,7 @@ const getAdvancedInference = async () => {
         "labels": pointLabels
     }
     // console.log(params);
-    axios.defaults.baseURL =
-        process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-    const result = await axios.post(base + '/api/v1/try_it_out/interactiveInference', params, {
+    const result = await apiInstance.post('/try_it_out/interactiveInference', params, {
         headers: {
             'Content-Type': 'application/json',
         },
@@ -1117,7 +1109,7 @@ onMounted(async () => {
     justify-items: left;
     gap: 8px;
     max-width: 360px;
-    padding-top: 5px;
+    padding-top: 2px;
     /* overflow: auto;
     scrollbar-width: thin;
     height: 80px; */

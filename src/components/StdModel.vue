@@ -1,5 +1,11 @@
 <template>
     <div class="model-container">
+        <div class="model-example">
+            <p @click="handleStdExample">
+                <svg t="1723106389722" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="27652" width="15" height="15"><path d="M512 102.400576a259.647838 259.647838 0 0 0-259.391838 259.327838 258.047839 258.047839 0 0 0 121.599924 219.519863l47.93597 30.079981v75.519953h179.199888v-75.519953l47.93597-30.079981a258.111839 258.111839 0 0 0 121.599924-219.519863A259.583838 259.583838 0 0 0 511.552 102.400576m0-102.399936a361.663774 361.663774 0 0 1 361.727774 361.727774 361.151774 361.151774 0 0 1-169.727894 306.239809v121.599924h-383.99976v-121.599924A361.087774 361.087774 0 0 1 149.760226 361.728414 361.727774 361.727774 0 0 1 512 0.00064zM320.00012 892.096082h383.99976v102.399936H320.00012z" p-id="27653" fill="#1296db"></path><path d="M435.904048 487.616335a51.199968 51.199968 0 0 1-36.543978-15.29599 157.119902 157.119902 0 0 1-45.247971-110.591931A158.079901 158.079901 0 0 1 512 203.840513a156.991902 156.991902 0 0 1 110.463931 45.247971 51.199968 51.199968 0 0 1 0.767999 72.447955 51.199968 51.199968 0 0 1-72.447954 0.704 55.039966 55.039966 0 0 0-38.783976-15.99999 55.487965 55.487965 0 0 0-55.487965 55.487965 55.039966 55.039966 0 0 0 15.93599 38.783976 51.199968 51.199968 0 0 1-0.64 72.447954 51.199968 51.199968 0 0 1-35.903977 14.655991z" p-id="27654" fill="#1296db"></path></svg>
+                <span style="color:#1296db; font-weight: 500;">Example</span>
+            </p>
+        </div>
         <div class="model-setting">
             <div class="upload-container-std">
                 <span class="upload-title">Step1: Upload Image</span>
@@ -18,7 +24,7 @@
                 </div>
                 <div class="upload-box" v-else>
                     <el-progress v-if="!imageUrl" :text-inside="true" :stroke-width="16" :percentage="imgProgress"
-                        style="position: relative; top: 25%;" />
+                        style="position: relative; top: 40%;" status="success" />
                     <div class="img-btn-group" v-if="imageUrl">
                         <!-- <el-icon @click="handleImgRemove"><Delete /></el-icon> -->
                         <el-button :icon="Close" style="width: 8px; height:8px; padding: 8px;"
@@ -28,7 +34,7 @@
                 </div>
 
                 <span class="upload-title">Step2: Upload CSV</span>
-                <div class="upload-box">
+                <!-- <div class="upload-box">
                     <el-upload ref="uploadCsvRef" :file-list="csvFileList" accept=".csv" :http-request="handleUploadCsv"
                         :on-change="handleCsvChange" :on-exceed="handleCsvExceed" :show-file-list="false" :limit="1"
                         drag :auto-upload="false">
@@ -50,6 +56,28 @@
                         <el-button style="margin: 16px 0 16px 0;" :icon="Delete" size="small" circle
                             @click="handleCsvRemove" />
                     </div>
+                </div> -->
+                <div class="upload-box" v-if="isUploadCsv">
+                    <el-upload ref="uploadCsvRef" :file-list="csvFileList" accept=".csv" :http-request="handleUploadCsv"
+                        :limit="1" drag>
+                        <div class="el-upload__text">
+                            Drop CSV Here<br> -or- <br>Click to Select
+                        </div>
+                        <template #tip>
+                            <div class="el-upload__tip" style="color:red;">limit 1 file, new file will cover the old
+                                file</div>
+                        </template>
+                    </el-upload>
+                </div>
+                <div class="upload-box" v-else>
+                    <el-progress v-if="!csvFileName" style="margin: 16px 0 16px 0; text-align: center; position: relative; top: 40%;"
+                        :text-inside="true" :stroke-width="16" :percentage="csvProgress" status="success"></el-progress>
+                    <div class="img-btn-group" v-if="csvFileName">
+                        <el-button :icon="Close" style="width: 8px; height:8px; padding: 8px;" @click="handleCsvRemove" />
+                    </div>
+                    <el-table :data="csvData" v-if="csvFileName" border height="250" style="width: 86%; margin-top: 10px;">
+                        <el-table-column v-for="(header, index) in csvHeaders" :key="index" :prop="header" :label="header"></el-table-column>
+                    </el-table>
                 </div>
             </div>
 
@@ -98,7 +126,7 @@
                         </div>
                     </div>
 
-                    
+
 
                     <div class="checkbox-wrapper" style="padding-top: 25px;">
                         <input id="cbx-51" type="checkbox" v-model="showMask">
@@ -156,12 +184,15 @@
                 <el-button class="result-btn normal-btn"
                     :disabled="!resultImgUrl || !resultMaskUrl || runState != 'success'"
                     @click="showEdit">Edit</el-button>
-                <el-dialog append-to-body width="1200px" top="20px" title="Edit Mask" v-model="dialogEditVisible" :show-close="false" 
-                    destroy-on-close draggable :close-on-click-modal=false :close-on-press-escape=false class="edit-dialog">
+                <el-dialog append-to-body width="1200px" top="20px" title="Edit Mask" v-model="dialogEditVisible"
+                    :show-close="false" destroy-on-close draggable :close-on-click-modal=false
+                    :close-on-press-escape=false class="edit-dialog">
                     <template #header="{ close }">
                         <div class="form-title">
                             <p>Edit Mask</p>
-                            <el-icon  @click="close"><Close /></el-icon>
+                            <el-icon @click="close">
+                                <Close />
+                            </el-icon>
                         </div>
                     </template>
                     <SegmentEdit :imgName=bkeImgName :jsonData=resultJsonFile :imageUrl=resultImgUrl
@@ -176,22 +207,15 @@
 </template>
 
 <script lang="ts" setup>
-import { Picture, Delete, Close } from '@element-plus/icons-vue'
-import type { UploadFile, UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
-import { genFileId } from 'element-plus'
+import { Picture, Close } from '@element-plus/icons-vue'
+import type { UploadInstance } from 'element-plus'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
-import axios from 'axios'
 import JSZip from "jszip"
 import { loadImage } from '@/helper/loadImage'
 import { rleArrToBinaryMask, rleFromString } from '@/helper/maskUtils'
-
-// axios api setting
-axios.defaults.baseURL =
-    process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-// const base = process.env.NODE_ENV === "development" ? "/api" : "";
-// axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-const bkebase = process.env.NODE_ENV === "development" ? "/bke" : "";
+import {apiInstance, staticFileInstance} from '@/services/api'
+import Papa from 'papaparse';
 
 // upload file-image
 // const imgInput = ref<HTMLInputElement>();
@@ -205,13 +229,15 @@ const uploadImgRef = ref<UploadInstance>();
 
 // upload file-csv
 // const csvInput = ref<HTMLInputElement>();
-var csvFileName: string = '';
+const csvFileName = ref('');
 var csvFilePath: string = '';
 const isUploadCsv = ref(true);
 const csvProgress = ref(0.0);
 const csvFileList: any = ref([]);
 const uploadCsvRef = ref<UploadInstance>()
 const selectCsvFileName = ref('');
+const csvData = ref(<any>[]);
+const csvHeaders = ref(<any>[]);
 
 // running model
 const runState = ref('ready');
@@ -277,18 +303,18 @@ const handleImgRemove = () => {
     csvProgress.value = 0.0;
 }
 const handleUploadImg = async (item) => {
-    // handlePictureCardPreview(item.file);
-    await uploadInteractiveImg(item.file);
+    handleImgRemove();
+    isUploadImg.value = false;
+    let formData = new FormData();
+    formData.append('image_file', item.file);
+    await uploadInteractiveImg(formData);
+    handlePictureCardPreview(item.file);
 }
-const uploadInteractiveImg = async (file: File) => {
+const uploadInteractiveImg = async (formData: FormData) => {
     try {
         console.log("===upload interactive===");
-        imageUrl.value = '';
-        isUploadImg.value = false;
-        bkeImgName = '';
-        let formData = new FormData();
-        formData.append('image_file', file);
-        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadImage', formData, {
+        
+        const result = await apiInstance.post('/try_it_out/uploadImage', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -299,21 +325,18 @@ const uploadInteractiveImg = async (file: File) => {
         });
         // console.log(result);
         bkeImgName = result.data.image_name;
-        handlePictureCardPreview(file);
+        // handlePictureCardPreview(file);
     } catch (err) {
         console.error(err);
     }
 }
 
-const uploadCsv = async (file: File) => {
+const uploadCsv = async (formData: FormData) => {
     try {
         console.log("===upload csv===");
-        isUploadCsv.value = false;
-        csvFileName = '';
-        let formData = new FormData();
-        formData.append('csv_file', file);
+        
         // formData.append('image_name', bkeImgName);
-        const result = await axios.post(bkebase + '/api/v1/try_it_out/uploadCSV', formData, {
+        const result = await apiInstance.post('/try_it_out/uploadCSV', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -323,7 +346,7 @@ const uploadCsv = async (file: File) => {
             }
         });
         // console.log(result);
-        csvFileName = result.data.csv_file_name;
+        csvFileName.value = result.data.csv_file_name;
         csvFilePath = result.data.csv_file_path;
     } catch (err) {
         console.error(err);
@@ -331,39 +354,37 @@ const uploadCsv = async (file: File) => {
 }
 
 const handleUploadCsv = async (item) => {
-    await uploadCsv(item.file);
+    isUploadCsv.value = false;
+    csvFileName.value = '';
+    let formData = new FormData();
+    formData.append('csv_file', item.file);
+    await uploadCsv(formData);
+    // csvFileName.value = 'aaa';
+    Papa.parse(item.file, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        complete: (results) => {
+            csvData.value = results.data;
+            csvHeaders.value = Object.keys(results.data[0] || {});
+            // console.log(csvData.value);
+        },
+        error: (error) => {
+            console.error('Error parsing CSV:', error);
+        }
+    });
 }
-const submitUpload = () => {
-    if (bkeImgName != '' && !isUploadImg.value) {
-        uploadCsvRef.value!.submit();
-    } else {
-        ElMessageBox.alert('Please upload image first.', 'Warning');
-    }
-}
-const handleCsvChange = (file: UploadFile) => {
-    // console.log('===csv change===');
-    // console.log(file);
-    selectCsvFileName.value = file.name;
-    if (file.status == 'ready') {
-        // console.log(file.name);
-        csvProgress.value = 0.0;
-        csvFileName = '';
-    }
-}
-const handleCsvExceed: UploadProps['onExceed'] = (files) => {
-    handleCsvRemove();
-    const file = files[0] as UploadRawFile;
-    file.uid = genFileId();
-    uploadCsvRef.value!.handleStart(file);
-}
+
 const handleCsvRemove = () => {
-    uploadCsvRef.value!.clearFiles();
+    isUploadCsv.value = true;
+    // uploadCsvRef.value!.clearFiles();
     if (csvFileList.value.length > 0) {
         csvFileList.value = [];
     }
     selectCsvFileName.value = '';
     csvProgress.value = 0.0;
-    csvFileName = '';
+    csvFileName.value = '';
+    csvData.value = [];
 }
 const clearResult = () => {
     runState.value = 'ready';
@@ -382,7 +403,7 @@ const runModel = async () => {
     // csvFileName = '4b2891c1-3480-463b-aad5-5f50943c26eb.csv';
     if (bkeImgName == '') {
         ElMessageBox.alert('Please upload image.', 'Warning');
-    } else if (csvFileName == '') {
+    } else if (csvFileName.value == '') {
         ElMessageBox.alert('Please upload csv file.', 'Warning');
     } else {
         clearResult();
@@ -399,12 +420,12 @@ const runModel = async () => {
                 'image_name': bkeImgName
             };
             // https://coralscop-bke.hkustvgd.com/api/v1/advanced_inference/sparseToDenseInference
-            const result = await axios.post(bkebase + '/api/v1/try_it_out/sparseToDenseInference', params, {
+            const result = await apiInstance.post('/try_it_out/sparseToDenseInference', params, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             });
-            stopRunTime();
+            
             // console.log(result);
             if (result.status = 200) {
                 resultData = result.data;
@@ -414,6 +435,8 @@ const runModel = async () => {
                 runState.value = 'fail';
                 errorMsg.value = "Something went wrong!";
             }
+
+            stopRunTime();
         } catch (err: any) {
             console.error(err);
             runState.value = 'fail';
@@ -425,7 +448,7 @@ const runModel = async () => {
 const handleDrawByScore = () => {
     // console.log("===change score===");
     nextTick(() => {
-        console.log(resultData);
+        // console.log(resultData);
         generateMask(resultData.annotations, resultData.image.height, resultData.image.width);
 
     });
@@ -496,7 +519,7 @@ const handleStdResult = async () => {
     // get the image file
     try {
         var filename = resultData.image.file_name.slice(1);
-        var resultImg = await axios.get(bkebase + filename, {
+        var resultImg = await staticFileInstance.get(filename, {
             responseType: 'arraybuffer'
         });
         const originBlob = new Blob([resultImg.data], { type: resultImg.headers['content-type'] });
@@ -549,7 +572,7 @@ const handleClear = () => {
     bkeImgName = '';
     imgProgress.value = 0.0;
 
-    csvFileName = '';
+    csvFileName.value = '';
     isUploadCsv.value = true;
     csvFileList.value = [];
     csvProgress.value = 0.0;
@@ -603,6 +626,51 @@ const handleEditResult = async (result) => {
     resultMaskUrl.value = result.editMask;
     labelTag.value = result.labels;
     resultData = result.editJson;
+}
+import beforeUrl from '@/assets/image60.jpg'
+const handleStdExample = async () => {
+    // upload image
+    handleImgRemove();
+    isUploadImg.value = false;
+    fetch(beforeUrl)
+        .then(res => res.blob())
+        .then(async blob => {
+            let file = new File([blob], 'example.png', {type: 'image/png'});
+            let formData = new FormData();
+            formData.append('image_file', file);
+            await uploadInteractiveImg(formData);
+            imageUrl.value = beforeUrl;
+        });
+    // upload csv file
+    handleCsvRemove();
+    var exampleData = [
+        ['186','402','coral'],
+        ['1300','281','fish'],
+        ['710','281','coral']
+    ];
+    var csv = Papa.unparse(exampleData);
+    // console.log(csv);
+    const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    let csvFile = new File([csvBlob], 'example.csv', {type: 'text/csv'});
+    csvFileList.value.push(csvFile);
+    isUploadCsv.value = false;
+    // csvFileName.value = 'aaa';
+    let formData = new FormData();
+    formData.append('csv_file', csvFile);
+    await uploadCsv(formData);
+    Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        complete: (results) => {
+            csvData.value = results.data;
+            csvHeaders.value = Object.keys(results.data[0] || {});
+            // console.log(csvData.value);
+        },
+        error: (error) => {
+            console.error('Error parsing CSV:', error);
+        }
+    });
 }
 
 </script>
@@ -769,7 +837,7 @@ const handleEditResult = async (result) => {
     padding: 5px;
     z-index: 80;
     border: 1px dashed gray;
-    height: 80px;
+    height: 72px;
     overflow-y: auto;
     scrollbar-width: thin;
 }

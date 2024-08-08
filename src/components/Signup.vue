@@ -45,14 +45,9 @@
 </template>
 
 <script lang="ts" setup>
-import axios from 'axios'
 import { FormRules } from 'element-plus';
 import { Close } from '@element-plus/icons-vue'
-// axios api setting
-axios.defaults.baseURL =
-  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-//   axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-  const base = process.env.NODE_ENV === "development" ? "/bke" : "";
+import { apiInstance } from '@/services/api'
 
 const emit = defineEmits(['openLogin']);
 const dialogSignUpVisible = ref(false);
@@ -84,10 +79,7 @@ const handleSignUp = async () => {
         console.log("===SignUp===");
         // console.log(process.env.NODE_ENV);
         // console.log(base);
-        axios.defaults.baseURL =
-          process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-
-        const result = await axios.post(base+'/api/v1/user/signup', signUpData.value, {
+        const result = await apiInstance.post('/user/signup', signUpData.value, {
             headers: {
                 'Content-Type': 'application/json',
             },

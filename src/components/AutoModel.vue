@@ -1,5 +1,11 @@
 <template>
     <div class="model-container">
+        <div v-show="usrMode === 'try'" class="model-example">
+            <p @click="handleAutoExample">
+                <svg t="1723106389722" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="27652" width="15" height="15"><path d="M512 102.400576a259.647838 259.647838 0 0 0-259.391838 259.327838 258.047839 258.047839 0 0 0 121.599924 219.519863l47.93597 30.079981v75.519953h179.199888v-75.519953l47.93597-30.079981a258.111839 258.111839 0 0 0 121.599924-219.519863A259.583838 259.583838 0 0 0 511.552 102.400576m0-102.399936a361.663774 361.663774 0 0 1 361.727774 361.727774 361.151774 361.151774 0 0 1-169.727894 306.239809v121.599924h-383.99976v-121.599924A361.087774 361.087774 0 0 1 149.760226 361.728414 361.727774 361.727774 0 0 1 512 0.00064zM320.00012 892.096082h383.99976v102.399936H320.00012z" p-id="27653" fill="#1296db"></path><path d="M435.904048 487.616335a51.199968 51.199968 0 0 1-36.543978-15.29599 157.119902 157.119902 0 0 1-45.247971-110.591931A158.079901 158.079901 0 0 1 512 203.840513a156.991902 156.991902 0 0 1 110.463931 45.247971 51.199968 51.199968 0 0 1 0.767999 72.447955 51.199968 51.199968 0 0 1-72.447954 0.704 55.039966 55.039966 0 0 0-38.783976-15.99999 55.487965 55.487965 0 0 0-55.487965 55.487965 55.039966 55.039966 0 0 0 15.93599 38.783976 51.199968 51.199968 0 0 1-0.64 72.447954 51.199968 51.199968 0 0 1-35.903977 14.655991z" p-id="27654" fill="#1296db"></path></svg>
+                <span style="color:#1296db; font-weight: 500;">Example</span>
+            </p>
+        </div>
         <div class="model-setting">
             <div class="upload-container" v-if="upload">
                 <el-upload ref="uploadImgRef" :file-list="imgFileList" accept="image/*" :http-request="handleUploadImg" :show-file-list="false" :limit="1" drag>
@@ -156,7 +162,7 @@
                         </div>
                     </template>
                     <el-skeleton :rows="10" animated v-if="dialogLoading"/>
-                    <SegmentEdit v-else :imgName=bkeImgName :jsonData=resultJsonFile :imageUrl=resultImgUrl :opacity=maskOpacity :score=score @edit-result="handleEditResult">
+                    <SegmentEdit v-else :imgName=uploadImgName :jsonData=resultJsonFile :imageUrl=resultImgUrl :opacity=maskOpacity :score=score @edit-result="handleEditResult">
                     </SegmentEdit>
                 </el-dialog>
 
@@ -352,7 +358,7 @@ const uploadToSvr = async (formData: FormData) => {
             },
         });
         uploadImgName.value = result.data.image_name;
-        bkeImgName = result.data.image_name;
+        // bkeImgName = result.data.image_name;
     } catch (err) {
         console.error(err);
     }
@@ -379,7 +385,7 @@ const uploadToSvr = async (formData: FormData) => {
 //         return false;
 //     }
 // }
-var bkeImgName: string = '';
+// var bkeImgName: string = '';
 // var imgFile:File;
 const handleUploadImg = async (item) => {
     let formData = new FormData();
@@ -407,7 +413,7 @@ const clearResult = () => {
 }
 
 const runModel = async () => {
-    if (uploadImgName.value == '' || (bkeImgName == '' && usrMode.value == 'try')) {
+    if (uploadImgName.value == '') {
         ElMessageBox.alert('Please upload image.', 'Warning');
     } else {
         clearResult();
@@ -742,7 +748,7 @@ const handleClear = () => {
         upload.value = true;
         uploadImgName.value = '';
         // uploadImgName.value = '8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg';
-        bkeImgName = '';
+        // bkeImgName = '';
 
         isEditParam.value = false;
     }
@@ -812,6 +818,19 @@ const initAutoModel = async () => {
         imageUrl.value = <string>props.imageUrl;
         uploadImgName.value = <string>props.imageName;        
     }
+}
+import beforeUrl from '@/assets/image60.jpg'
+const handleAutoExample = async () => {
+    handleRemove();
+    fetch(beforeUrl)
+        .then(res => res.blob())
+        .then(async blob => {
+            let formData = new FormData();
+            formData.append('image_file', blob);
+            upload.value = false;
+            await uploadToSvr(formData);
+            imageUrl.value = beforeUrl;
+        });
 }
 
 onMounted(() => {
@@ -1488,6 +1507,18 @@ onMounted(() => {
         width: 100%;
         text-align: center;
     }
+}
+.model-example {
+    position: absolute;
+    top: 25px;
+    left: 450px;
+    z-index: 500;
+    cursor: pointer;
+    border: 1px solid #139FE1;
+}
+.model-example p {
+    margin: 0;
+    padding: 5px;
 }
 
 </style>

@@ -7,7 +7,7 @@ import router from './router'
 import { userInfoStore } from './store/user'
 
 import setupInterceptors from './services/setupInterceptors';
-setupInterceptors(userInfoStore);
+setupInterceptors();
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -17,20 +17,20 @@ app.use(pinia)
 app.mount('#app')
 
 router.beforeEach((to, from, next) => {
-  let isLogin = userInfoStore().isLogin;
-
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-      // this route requires auth, check if logged in
-      // if not, redirect to login page.
-      if (!isLogin) {        
-        next({ name: 'login', query:{ redirect: to.path?.toString()} })
-      } else {
-        next() 
-      }
+    let isLogin = userInfoStore().isLogin;
+    console.log(from);
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        // this route requires auth, check if logged in
+        // if not, redirect to login page.
+        if (!isLogin) {
+            next({ name: 'login', query: { redirect: to.path?.toString() } })
+        } else {
+            next()
+        }
     } else {
-      next()
+        next()
     }
-  })
+})
 
 
 

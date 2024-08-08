@@ -7,7 +7,7 @@
         v-model="dialogUserProfileVisible"
         @keyup.enter="updateUserInfo"
     >
-        <template #header="{ close }">
+        <template >
             <div class="form-title">
                 <p v-if="updateInfoFormState == 'form'">Profile</p>
                 <p v-if="updateInfoFormState == 'success'">Updated successfully</p>
@@ -42,15 +42,16 @@
 </template>
 
 <script lang="ts" setup>
-import axios from 'axios'
+// import axios from 'axios'
 import { FormRules } from 'element-plus';
-import { Close, Edit } from '@element-plus/icons-vue'
+import { Edit } from '@element-plus/icons-vue'
 import { userInfoStore } from '@/store/user'
+import {apiInstance} from '@/services/api';
 // axios api setting
-axios.defaults.baseURL =
-  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
-//   axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-  const base = process.env.NODE_ENV === "development" ? "/bke" : "";
+// axios.defaults.baseURL =
+//   process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
+// //   axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+//   const base = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const userStore = userInfoStore();
 const dialogUserProfileVisible = ref(false);
@@ -65,7 +66,7 @@ const userData = ref({
 
 
 
-const validatePass2 = (rule: any, value: any, callback: any) => {
+const validatePass2 = (value: any, callback: any) => {
   if (value !== userData.value.new_password) {
     callback(new Error(`Two inputs don't match!`))
   } else {
@@ -94,10 +95,10 @@ const handleUpdate = async () => {
         console.log("===usr info UPDATE===");
         // console.log(process.env.NODE_ENV);
         // console.log(base);
-        axios.defaults.baseURL =
-          process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
+        // axios.defaults.baseURL =
+        //   process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/";
         
-        const result = await axios.put('http://localhost:9090/api/v1/user/', userData.value, {
+        const result = await apiInstance.put('/user/', userData.value, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userStore.userInfo.token}`

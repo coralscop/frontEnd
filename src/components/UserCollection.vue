@@ -985,7 +985,7 @@ const handleBatchProcess = () => {
         newItem.isDone = 'waiting';
         return newItem;
     });
-    console.log(runImageList);
+    // console.log(runImageList);
     console.log("=== batch process ===");
     var iou, sta, point, minarea;
     modelParams.value.forEach(element => {

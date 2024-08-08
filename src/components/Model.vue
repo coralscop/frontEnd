@@ -12,7 +12,7 @@
             </label>
         </div>
         <!-- <div class="blank"></div> -->
-        <AutoModel v-if="mode == 'auto'" :usr-mode="'try'"></AutoModel>
+        <AutoModel v-if="mode == 'auto'" :usrMode="'try'"></AutoModel>
         <StdModel v-if="mode == 'std'"></StdModel>
     </div>
 </template>
